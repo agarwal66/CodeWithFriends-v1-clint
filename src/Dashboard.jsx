@@ -172,7 +172,7 @@ export default function Dashboard() {
   }, [user]);
 
   const toggleTheme = () => setDarkMode(prev => !prev);
-  const logout = () => window.open("http://localhost:4000/auth/logout", "_self");
+  const logout = () => window.open(`${process.env.REACT_APP_BACKEND_URL}/auth/logout`, "_self");
   const createRoom = () => navigate(`/editor/${uuidv4()}`);
   const joinRoom = () => joinCode.trim() && navigate(`/editor/${joinCode.trim()}`);
   const handleJoinAgain = (roomId) => navigate(`/editor/${roomId}`);
