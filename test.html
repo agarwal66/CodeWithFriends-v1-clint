@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.IO Test</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+  <h2>Basic Socket.IO Test</h2>
+  <textarea id="box" rows="10" cols="60"></textarea>
+
+  <script>
+    const socket = io("http://localhost:4000", {
+      transports: ["websocket"],
+    });
+
+    const box = document.getElementById("box");
+
+    box.addEventListener("input", () => {
+      socket.emit("send-code", { roomId: "test-room", code: box.value });
+    });
+
+    socket.on("code-update", (data) => {
+      box.value = data;
+    });
+
+    socket.emit("join-room", "test-room");
+  </script>
+</body>
+</html>

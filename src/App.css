@@ -1,0 +1,253 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #1e1e2f;
+  color: white;
+}
+
+.login-box {
+  background: #29293d;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.google-login-btn,
+.email-login-btn {
+  padding: 10px 20px;
+  background-color: #00b894;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  margin-top: 15px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+}
+
+.google-login-btn:hover,
+.email-login-btn:hover {
+  background-color: #019170;
+}
+
+.input-box {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  background: #404050;
+  color: white;
+}
+
+/* --Dashboard css */
+/* Dashboard.css */
+
+.dashboard-container {
+  min-height: 100vh;
+  padding: 30px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dashboard-container.dark {
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+.dashboard-container.light {
+  background-color: #f9f9f9;
+  color: #1a1a1a;
+}
+
+.dashboard-container h2,
+.dashboard-container h3 {
+  margin-bottom: 10px;
+}
+
+.dashboard-container img {
+  border-radius: 50%;
+  border: 3px solid #888;
+}
+
+.dashboard-container input {
+  padding: 10px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: #e2e2e2;
+  color: #000;
+}
+
+.dashboard-container.dark input {
+  background-color: #1f1f1f;
+  color: #f0f0f0;
+}
+
+.dashboard-container button {
+  padding: 10px 15px;
+  margin: 6px 8px 6px 0;
+  background: #3f51b5;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.dashboard-container button:hover {
+  background: #5c6bc0;
+}
+
+.dashboard-container ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.dashboard-container li {
+  background: #e8e8e8;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.dashboard-container.dark li {
+  background: #1e1e1e;
+  border: 1px solid #333;
+}
+
+hr {
+  border-top: 1px solid #666;
+  margin: 30px 0;
+}
+
+.theme-toggle {
+  float: right;
+  padding: 6px 12px;
+  border-radius: 5px;
+  border: none;
+  background-color: #616161;
+  color: white;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+/* --editor css */
+/* Editor Page Styles */
+.editor-container {
+  padding: 30px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: background-color 0.3s ease;
+  min-height: 100vh;
+}
+
+.editor-container.dark {
+  background-color: #1e1e1e;
+  color: #f1f1f1;
+}
+
+.editor-container.light {
+  background-color: #f9f9f9;
+  color: #1e1e1e;
+}
+
+h2, h3, h4 {
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 8px 14px;
+  margin: 6px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button.primary {
+  background-color: #4CAF50;
+  color: white;
+}
+
+button.secondary {
+  background-color: #1976d2;
+  color: white;
+}
+
+button.danger {
+  background-color: crimson;
+  color: white;
+}
+
+button.toggle-mode {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+input[type="text"], select, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+pre {
+  background: #2d2d2d;
+  color: #f1f1f1;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+.editor-box {
+  background: #2c2c2c;
+  color: white;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  margin-top: 20px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  padding: 4px 0;
+}
+
+.audio-indicator {
+  font-weight: bold;
+  color: #4CAF50;
+  margin: 8px 0;
+}
+
+.language-selector,
+.voice-controls,
+.code-runner,
+.chat-section,
+.active-users {
+  margin-top: 30px;
+}
+
+.audio-controls button {
+  margin-right: 10px;
+}
