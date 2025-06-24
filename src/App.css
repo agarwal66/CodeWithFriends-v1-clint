@@ -148,11 +148,11 @@ hr {
 
 .editor-container.dark {
   background-color: #1e1e1e;
-  color: #f1f1f1;
+  color: #b7a2a2;
 }
 
 .editor-container.light {
-  background-color: #f9f9f9;
+  background-color: #1d36369a;
   color: #1e1e1e;
 }
 
@@ -176,7 +176,7 @@ button:hover {
 
 button.primary {
   background-color: #4CAF50;
-  color: white;
+  color: rgb(39, 26, 26);
 }
 
 button.secondary {
@@ -195,7 +195,7 @@ button.toggle-mode {
   right: 10px;
   padding: 6px 12px;
   border-radius: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid #694343;
 }
 
 input[type="text"], select, textarea {
@@ -204,12 +204,12 @@ input[type="text"], select, textarea {
   margin-top: 5px;
   margin-bottom: 15px;
   border-radius: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid #311414;
   font-size: 14px;
 }
 
 pre {
-  background: #2d2d2d;
+  background: #eec0c0;
   color: #f1f1f1;
   padding: 10px;
   border-radius: 5px;
@@ -218,7 +218,7 @@ pre {
 
 .editor-box {
   background: #2c2c2c;
-  color: white;
+  color: rgb(187, 143, 143);
   padding: 15px;
   border-radius: 6px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);

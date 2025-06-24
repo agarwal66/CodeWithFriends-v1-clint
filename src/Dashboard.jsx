@@ -116,6 +116,7 @@ export default function Dashboard() {
   // ✅ Fetch profile
   useEffect(() => {
     fetch(`${process.env.REACT_APP_BACKEND_URL}/profile`, {
+      method:"GET",
       credentials: "include",
     })
       .then((res) => {
