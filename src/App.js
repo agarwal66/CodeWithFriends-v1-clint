@@ -11,7 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/editor/:roomId" element={<Editor />} /> {/* ✅ New route */}
+        <Route path="/editor/:roomId" element={<Editor />} />
        <Route path="/history" element={<History />} />
         <Route path="/history" element={<RoomHistory />} />
       </Routes>
