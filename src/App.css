@@ -133,7 +133,7 @@ hr {
   border-radius: 5px;
   border: none;
   background-color: #616161;
-  color: rgb(66, 47, 47);
+  color: rgb(251, 226, 226);
   cursor: pointer;
   margin-bottom: 20px;
 }
@@ -148,7 +148,7 @@ hr {
 
 .editor-container.dark {
   background-color: #1e1e1e;
-  color: #422626;
+  color: #cfb2b2;
 }
 
 .editor-container.light {
@@ -204,7 +204,7 @@ input[type="text"], select, textarea {
   margin-top: 5px;
   margin-bottom: 15px;
   border-radius: 5px;
-  border: 1px solid #311414;
+  border: 1px solid #cfc2c2;
   font-size: 14px;
 }
 
