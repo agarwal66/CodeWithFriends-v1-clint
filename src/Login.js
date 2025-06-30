@@ -73,8 +73,170 @@
 //     </div>
 //   );
 // }
+// import React, { useState } from "react";
+// import "./App.css"; // ✅ Your existing CSS
+// import axios from "axios";
+
+// const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+// export default function LoginPage() {
+//   const [showEmailLogin, setShowEmailLogin] = useState(false);
+//   const [showRegister, setShowRegister] = useState(false);
+//   const [email, setEmail] = useState("");
+//   const [password, setPassword] = useState("");
+//   const [name, setName] = useState("");
+
+//   const handleGoogleLogin = () => {
+//     window.open(`${BACKEND_URL}/auth/google`, "_self");
+//   };
+
+//   const handleEmailLogin = async (e) => {
+//     e.preventDefault();
+//     try {
+//       const res = await axios.post(
+//         `${BACKEND_URL}/auth/login`,
+//         { email, password },
+//         { withCredentials: true }
+//       );
+//       alert("✅ Login successful!");
+//       window.location.href = "/dashboard";
+//     } catch (err) {
+//       alert("❌ Login failed: " + err.response?.data?.error);
+//     }
+//   };
+
+//   const handleRegister = async (e) => {
+//     e.preventDefault();
+//     try {
+//       const res = await axios.post(`${BACKEND_URL}/auth/register`, {
+//         name,
+//         email,
+//         password,
+//       });
+//       alert("✅ Registration successful! You can now login.");
+//       setShowRegister(false);
+//     } catch (err) {
+//       alert("❌ Registration failed: " + err.response?.data?.error);
+//     }
+//   };
+
+//   return (
+//     <div className="login-container">
+//       <div className="login-box">
+//         <h2>👨‍💻 Welcome to Code With Friends</h2>
+
+//         {!showEmailLogin && !showRegister && (
+//           <>
+//             <button onClick={handleGoogleLogin} className="google-login-btn">
+//               🔐 Login with Google
+//             </button>
+//             <p style={{ marginTop: "15px" }}>
+//               or{" "}
+//               <span
+//                 onClick={() => setShowEmailLogin(true)}
+//                 style={{ color: "#00f", cursor: "pointer", textDecoration: "underline" }}
+//               >
+//                 Login with Email
+//               </span>
+//             </p>
+//             <p style={{ marginTop: "10px" }}>
+//               Don't have an account?{" "}
+//               <span
+//                 onClick={() => setShowRegister(true)}
+//                 style={{ color: "#00f", cursor: "pointer", textDecoration: "underline" }}
+//               >
+//                 Register
+//               </span>
+//             </p>
+//           </>
+//         )}
+
+//         {showEmailLogin && !showRegister && (
+//           <>
+//             <form onSubmit={handleEmailLogin}>
+//               <input
+//                 type="email"
+//                 placeholder="Email"
+//                 value={email}
+//                 onChange={(e) => setEmail(e.target.value)}
+//                 required
+//                 className="input-box"
+//               />
+//               <input
+//                 type="password"
+//                 placeholder="Password"
+//                 value={password}
+//                 onChange={(e) => setPassword(e.target.value)}
+//                 required
+//                 className="input-box"
+//               />
+//               <button type="submit" className="email-login-btn">
+//                 Login
+//               </button>
+//             </form>
+//             <p style={{ marginTop: "15px" }}>
+//               or{" "}
+//               <span
+//                 onClick={() => setShowEmailLogin(false)}
+//                 style={{ color: "#00f", cursor: "pointer", textDecoration: "underline" }}
+//               >
+//                 Login with Google
+//               </span>
+//             </p>
+//           </>
+//         )}
+
+//         {showRegister && (
+//           <>
+//             <form onSubmit={handleRegister}>
+//               <input
+//                 type="text"
+//                 placeholder="Full Name"
+//                 value={name}
+//                 onChange={(e) => setName(e.target.value)}
+//                 required
+//                 className="input-box"
+//               />
+//               <input
+//                 type="email"
+//                 placeholder="Email"
+//                 value={email}
+//                 onChange={(e) => setEmail(e.target.value)}
+//                 required
+//                 className="input-box"
+//               />
+//               <input
+//                 type="password"
+//                 placeholder="Password"
+//                 value={password}
+//                 onChange={(e) => setPassword(e.target.value)}
+//                 required
+//                 className="input-box"
+//               />
+//               <button type="submit" className="email-login-btn">
+//                 Register
+//               </button>
+//             </form>
+//             <p style={{ marginTop: "15px" }}>
+//               Already have an account?{" "}
+//               <span
+//                 onClick={() => {
+//                   setShowRegister(false);
+//                   setShowEmailLogin(true);
+//                 }}
+//                 style={{ color: "#00f", cursor: "pointer", textDecoration: "underline" }}
+//               >
+//                 Login here
+//               </span>
+//             </p>
+//           </>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
 import React, { useState } from "react";
-import "./App.css"; // ✅ Your existing CSS
+import "./App.css";
 import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -85,6 +247,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleLogin = () => {
     window.open(`${BACKEND_URL}/auth/google`, "_self");
@@ -92,144 +255,182 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const res = await axios.post(
         `${BACKEND_URL}/auth/login`,
         { email, password },
         { withCredentials: true }
       );
-      alert("✅ Login successful!");
       window.location.href = "/dashboard";
     } catch (err) {
-      alert("❌ Login failed: " + err.response?.data?.error);
+      alert("Login failed: " + err.response?.data?.error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const res = await axios.post(`${BACKEND_URL}/auth/register`, {
         name,
         email,
         password,
       });
-      alert("✅ Registration successful! You can now login.");
+      alert("Registration successful! You can now login.");
       setShowRegister(false);
     } catch (err) {
-      alert("❌ Registration failed: " + err.response?.data?.error);
+      alert("Registration failed: " + err.response?.data?.error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2>👨‍💻 Welcome to Code With Friends</h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <div className="logo">CodeWithFriends</div>
+          <h2 className="auth-title">
+            {showRegister ? "Create Account" : "Welcome Back"}
+          </h2>
+          <p className="auth-subtitle">
+            {showRegister
+              ? "Get started with your account"
+              : "Sign in to continue to your account"}
+          </p>
+        </div>
 
         {!showEmailLogin && !showRegister && (
-          <>
-            <button onClick={handleGoogleLogin} className="google-login-btn">
-              🔐 Login with Google
+          <div className="auth-body">
+            <button onClick={handleGoogleLogin} className="btn-google">
+              <span className="google-icon"></span>
+              Continue with Google
             </button>
-            <p style={{ marginTop: "15px" }}>
-              or{" "}
-              <span
-                onClick={() => setShowEmailLogin(true)}
-                style={{ color: "#00f", cursor: "pointer", textDecoration: "underline" }}
-              >
-                Login with Email
-              </span>
-            </p>
-            <p style={{ marginTop: "10px" }}>
+            <div className="divider">
+              <span>or</span>
+            </div>
+            <button
+              onClick={() => setShowEmailLogin(true)}
+              className="btn-primary"
+            >
+              Continue with Email
+            </button>
+            <div className="auth-footer">
               Don't have an account?{" "}
-              <span
+              <button
                 onClick={() => setShowRegister(true)}
-                style={{ color: "#00f", cursor: "pointer", textDecoration: "underline" }}
+                className="text-link"
               >
-                Register
-              </span>
-            </p>
-          </>
+                Sign up
+              </button>
+            </div>
+          </div>
         )}
 
-        {showEmailLogin && !showRegister && (
-          <>
-            <form onSubmit={handleEmailLogin}>
+        {(showEmailLogin || showRegister) && (
+          <form
+            onSubmit={showRegister ? handleRegister : handleEmailLogin}
+            className="auth-form"
+          >
+            {showRegister && (
+              <div className="form-group">
+                <label htmlFor="name">Full Name</label>
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="form-input"
+                />
+              </div>
+            )}
+            <div className="form-group">
+              <label htmlFor="email">Email Address</label>
               <input
+                id="email"
                 type="email"
-                placeholder="Email"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="input-box"
+                className="form-input"
               />
+            </div>
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
               <input
+                id="password"
                 type="password"
-                placeholder="Password"
+                placeholder={showRegister ? "At least 8 characters" : "••••••••"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="input-box"
+                className="form-input"
+                minLength={showRegister ? 8 : undefined}
               />
-              <button type="submit" className="email-login-btn">
-                Login
-              </button>
-            </form>
-            <p style={{ marginTop: "15px" }}>
-              or{" "}
-              <span
-                onClick={() => setShowEmailLogin(false)}
-                style={{ color: "#00f", cursor: "pointer", textDecoration: "underline" }}
-              >
-                Login with Google
-              </span>
-            </p>
-          </>
+            </div>
+            {!showRegister && (
+              <div className="form-options">
+                <button
+                  type="button"
+                  onClick={() => setShowEmailLogin(false)}
+                  className="text-link"
+                >
+                  Use another method
+                </button>
+              </div>
+            )}
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="spinner"></span>
+              ) : showRegister ? (
+                "Create Account"
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
         )}
 
-        {showRegister && (
-          <>
-            <form onSubmit={handleRegister}>
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="input-box"
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="input-box"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="input-box"
-              />
-              <button type="submit" className="email-login-btn">
-                Register
-              </button>
-            </form>
-            <p style={{ marginTop: "15px" }}>
-              Already have an account?{" "}
-              <span
-                onClick={() => {
-                  setShowRegister(false);
-                  setShowEmailLogin(true);
-                }}
-                style={{ color: "#00f", cursor: "pointer", textDecoration: "underline" }}
-              >
-                Login here
-              </span>
-            </p>
-          </>
+        {(showEmailLogin || showRegister) && (
+          <div className="auth-footer">
+            {showRegister ? (
+              <>
+                Already have an account?{" "}
+                <button
+                  onClick={() => {
+                    setShowRegister(false);
+                    setShowEmailLogin(true);
+                  }}
+                  className="text-link"
+                >
+                  Sign in
+                </button>
+              </>
+            ) : (
+              <>
+                Don't have an account?{" "}
+                <button
+                  onClick={() => {
+                    setShowRegister(true);
+                    setShowEmailLogin(false);
+                  }}
+                  className="text-link"
+                >
+                  Sign up
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
     </div>
