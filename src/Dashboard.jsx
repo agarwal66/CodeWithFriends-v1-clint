@@ -188,59 +188,80 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={darkMode ? "dashboard-container dark" : "dashboard-container light"}>
-      <button
-        onClick={toggleTheme}
-        style={{
-          position: "absolute",
-          top: "15px",
-          right: "15px",
-          padding: "6px 12px",
-          borderRadius: "8px",
-          backgroundColor: darkMode ? "#333" : "#ddd",
-          color: darkMode ? "#fff" : "#111",
-          border: "1px solid gray",
-          cursor: "pointer"
-        }}
-      >
-        {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+  <div className="dashboard-container dark">
+    <button className="theme-toggle" onClick={toggleTheme}>
+      {darkMode ? "☀️ TERMINAL MODE" : "🌙 CYBER MODE"}
+    </button>
+
+    <header className="dashboard-header">
+      <div className="user-info">
+        <img src={user.photos?.[0]?.value} alt="profile" className="profile-pic" />
+        <div>
+          <h2>USER: {user.displayName}</h2>
+          <p>SYSTEM ACCESS GRANTED</p>
+        </div>
+      </div>
+      <button className="btn btn-primary" onClick={logout}>
+        <span className="icon">⏻</span> LOGOUT
       </button>
+    </header>
 
-      <h2>👋 Welcome, {user.displayName}</h2>
-      <img src={user.photos?.[0]?.value} alt="profile" width="80" style={{ borderRadius: '50%' }} />
-      <br /><br />
-      <button onClick={logout}>🚪 Logout</button>
+    <section className="action-section">
+      <h3>// COLLABORATION TERMINAL</h3>
+      <div className="button-group">
+        <button className="btn btn-primary" onClick={createRoom}>
+          <span className="icon">+</span> NEW SESSION
+        </button>
+        <input
+          type="text"
+          placeholder="ENTER ROOM CODE..."
+          value={joinCode}
+          onChange={(e) => setJoinCode(e.target.value)}
+          className="room-input"
+        />
+        <button className="btn" onClick={joinRoom}>
+          <span className="icon">↗</span> CONNECT
+        </button>
+        <button className="btn" onClick={() => navigate('/history')}>
+          <span className="icon">📜</span> ACCESS LOGS
+        </button>
+      </div>
+    </section>
 
-      <h3 style={{ marginTop: "30px" }}>✨ Create or Join a Collab Room</h3>
-      <button onClick={createRoom}>➕ Create Collab Room</button>
-      <br /><br />
-      <input
-        type="text"
-        placeholder="Enter Collab Code"
-        value={joinCode}
-        onChange={(e) => setJoinCode(e.target.value)}
-        style={{ padding: "8px", borderRadius: "5px", width: "200px" }}
-      />
-      <button onClick={joinRoom}>🔗 Join Collab Room</button>
-      <button onClick={() => navigate('/history')}>📜 View Room History</button>
-
-      <hr />
-
-      <h3>Your Past Collaborations</h3>
+    <section className="rooms-section">
+      <h3>// ACTIVE SESSIONS</h3>
       {rooms.length === 0 ? (
-        <p>No rooms yet.</p>
+        <div className="empty-state">
+          <p>NO ACTIVE SESSIONS DETECTED</p>
+        </div>
       ) : (
-        <ul>
+        <div className="room-list">
           {rooms.map((room, index) => (
-            <li key={index} style={{ marginBottom: "16px" }}>
-              <strong>Room ID:</strong> {room.roomId} <br />
-              <strong>Times Used:</strong> {room.count} <br />
-              <strong>Last Used:</strong> {new Date(room.latest).toLocaleString()} <br />
-              <button onClick={() => handleJoinAgain(room.roomId)}>🔁 Rejoin Room</button>
-            </li>
+            <div className="room-card" key={index}>
+              <div className="room-id">ID: {room.roomId}</div>
+              <div className="room-stats">
+                <div className="stat">
+                  <div className="stat-label">ACCESS COUNT</div>
+                  <div className="stat-value">{room.count}</div>
+                </div>
+                <div className="stat">
+                  <div className="stat-label">LAST ENTRY</div>
+                  <div className="stat-value">
+                    {new Date(room.latest).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+              <button
+                className="btn-rejoin"
+                onClick={() => handleJoinAgain(room.roomId)}
+              >
+                <span className="icon">⟳</span> RE-ESTABLISH CONNECTION
+              </button>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
-    </div>
-  );
+    </section>
+  </div>
+);
 }

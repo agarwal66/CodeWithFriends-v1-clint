@@ -277,7 +277,7 @@ body {
 /* --Dashboard css */
 /* Dashboard.css */
 
-.dashboard-container {
+/* .dashboard-container {
   min-height: 100vh;
   padding: 30px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -365,6 +365,197 @@ hr {
   color: rgb(251, 226, 226);
   cursor: pointer;
   margin-bottom: 20px;
+} */
+ /* App.css */
+:root {
+  --primary-bg: #f0f0f0;
+  --secondary-bg: #ffffff;
+  --text-color: #333333;
+  --accent-color: #4a6fa5;
+  --accent-hover: #3a5a8f;
+  --border-color: #dddddd;
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --empty-state: #eeeeee;
+}
+
+.dark {
+  --primary-bg: #121212;
+  --secondary-bg: #1e1e1e;
+  --text-color: #e0e0e0;
+  --accent-color: #6d8cc0;
+  --accent-hover: #5d7cb0;
+  --border-color: #333333;
+  --card-bg: #252525;
+  --input-bg: #2d2d2d;
+  --empty-state: #2a2a2a;
+}
+
+.dashboard-container {
+  font-family: 'Courier New', monospace;
+  background-color: var(--primary-bg);
+  color: var(--text-color);
+  min-height: 100vh;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--accent-hover);
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-pic {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-color);
+}
+
+.btn {
+  background: var(--secondary-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+}
+
+.btn:hover {
+  background: var(--accent-hover);
+  color: white;
+}
+
+.action-section, .rooms-section {
+  margin-bottom: 2rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.room-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-family: 'Courier New', monospace;
+}
+
+.room-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.room-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.room-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.room-stats {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.stat {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.stat-value {
+  font-weight: bold;
+}
+
+.empty-state {
+  background: var(--empty-state);
+  padding: 2rem;
+  text-align: center;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.btn-rejoin {
+  width: 100%;
+  text-align: center;
+  background: var(--secondary-bg);
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+}
+
+.icon {
+  font-size: 1.1rem;
+}
+
+/* Cyber mode enhancements */
+.dark .room-card {
+  border: 1px solid var(--accent-color);
+  box-shadow: 0 0 10px rgba(109, 140, 192, 0.1);
+}
+
+.dark .room-input {
+  border: 1px solid var(--accent-color);
 }
 /* --editor css */
 /* Editor Page Styles */
