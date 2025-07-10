@@ -294,8 +294,10 @@ import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
-import debounce from 'lodash.debounce';
-import throttle from 'lodash.throttle';
+// import debounce from 'lodash.debounce';
+// import throttle from 'lodash.throttle';
+import { debounce, throttle } from 'lodash';
+
 import './App.css';
 
 const MemoizedCodeMirror = memo(CodeMirror);
