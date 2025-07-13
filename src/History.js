@@ -7,7 +7,7 @@ export default function History() {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/room-history`, { credentials: "include" })
+    fetch(`${BACKEND_URL}/room-history, { credentials: "include" }`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -51,6 +51,14 @@ export default function History() {
               </p>
               <p className="creator">
                 👤 Created by: <strong>{room.creatorName || 'Unknown'}</strong>
+              </p>
+              <p className="timestamp">
+                🕒 Created on:{" "}
+                <strong>
+                  {room.roomCreatedAt
+                    ? new Date(room.roomCreatedAt).toLocaleString()
+                    : "N/A"}
+                </strong>
               </p>
               <button
                 className="rejoin-btn"
@@ -106,8 +114,14 @@ export default function History() {
 
         .creator {
           font-size: 0.95rem;
-          margin-bottom: 1rem;
+          margin-bottom: 0.5rem;
           color: #374151;
+        }
+
+        .timestamp {
+          font-size: 0.9rem;
+          color: #6b7280;
+          margin-bottom: 1rem;
         }
 
         .rejoin-btn {
