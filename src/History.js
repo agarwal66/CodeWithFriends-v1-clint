@@ -1,3 +1,15 @@
+  // useEffect(() => {
+  //   // fetch("http://localhost:4000/user-rooms",
+  //   fetch("http://localhost:4000/user-rooms", { credentials: "include" })
+
+  //     fetch("http://localhost:4000/room-history", 
+
+  //      {
+  //     credentials: "include",
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => setRooms(data));
+  // }, []);
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,7 +19,7 @@ export default function History() {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/room-history`, { credentials: "include" })
+    fetch(`${BACKEND_URL}/room-history, { credentials: "include" }`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -22,19 +34,6 @@ export default function History() {
         setRooms([]);
       });
   }, []);
-
-  // useEffect(() => {
-  //   // fetch("http://localhost:4000/user-rooms",
-  //   fetch("http://localhost:4000/user-rooms", { credentials: "include" })
-
-  //     fetch("http://localhost:4000/room-history", 
-
-  //      {
-  //     credentials: "include",
-  //   })
-  //     .then((res) => res.json())
-  //     .then((data) => setRooms(data));
-  // }, []);
 
   return (
     <div className="history-container">
@@ -52,6 +51,14 @@ export default function History() {
               <p className="creator">
                 👤 Created by: <strong>{room.creatorName || 'Unknown'}</strong>
               </p>
+              {room.roomCreatedAt && (
+                <p className="timestamp">
+                  🕒 Created on:{" "}
+                  <strong>
+                    {new Date(room.roomCreatedAt).toLocaleString()}
+                  </strong>
+                </p>
+              )}
               <button
                 className="rejoin-btn"
                 onClick={() => navigate(`/editor/${room.roomId}`)}
@@ -106,8 +113,14 @@ export default function History() {
 
         .creator {
           font-size: 0.95rem;
-          margin-bottom: 1rem;
+          margin-bottom: 0.5rem;
           color: #374151;
+        }
+
+        .timestamp {
+          font-size: 0.85rem;
+          color: #6b7280;
+          margin-bottom: 1rem;
         }
 
         .rejoin-btn {
