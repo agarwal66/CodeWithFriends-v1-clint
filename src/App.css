@@ -624,11 +624,11 @@ body {
   }
 
  .topbar-logo {
-  height: 64px;              /* was 48px */
+  height: 64px;              
   width: 64px;
   object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); /* subtle depth */
-  border-radius: 12px;        /* optional, for soft edges */
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); 
+  border-radius: 12px;        
 }
 
 
