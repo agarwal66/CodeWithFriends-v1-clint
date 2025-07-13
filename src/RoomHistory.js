@@ -9,7 +9,7 @@ export default function RoomHistory() {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/history`, { credentials: "include" })
+    fetch(`${BACKEND_URL}/history, { credentials: "include" }`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -34,7 +34,7 @@ export default function RoomHistory() {
   return (
     <div className={`room-history-container ${darkMode ? "dark" : "light"}`}>
       <button className="theme-toggle" onClick={toggleTheme}>
-        {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+        {darkMode ? "☀ Light Mode" : "🌙 Dark Mode"}
       </button>
 
       <h2 className="page-title">📜 Your Room History</h2>
@@ -56,6 +56,9 @@ export default function RoomHistory() {
               </p>
               <p className="creator">
                 👤 Created by: <strong>{room.creatorName || "Unknown"}</strong>
+              </p>
+              <p className="created-at">
+                🕒 Created on: <strong>{new Date(room.roomCreatedAt).toLocaleString()}</strong>
               </p>
               <button
                 className="rejoin-btn"
@@ -150,6 +153,12 @@ export default function RoomHistory() {
 
         .rejoin-btn:hover {
           background: #059669;
+        }
+
+        .created-at {
+          margin-top: 6px;
+          color: #94a3b8;
+          font-size: 0.95rem;
         }
 
         .error-text {
