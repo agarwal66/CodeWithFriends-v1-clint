@@ -7,7 +7,7 @@ export default function History() {
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
-    fetch(${BACKEND_URL}/room-history, { credentials: "include" })
+    fetch(`${BACKEND_URL}/room-history, { credentials: "include" }`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -57,7 +57,7 @@ export default function History() {
               </p>
               <button
                 className="rejoin-btn"
-                onClick={() => navigate(/editor/${room.roomId})}
+                onClick={() => navigate(`/editor/${room.roomId}`)}
               >
                 🔁 Rejoin Room
               </button>
