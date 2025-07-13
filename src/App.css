@@ -742,3 +742,36 @@ ul li {
 .audio-controls button {
   margin-right: 10px;
 }
+.ai-helper {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.ai-helper textarea {
+  width: 100%;
+  padding: 0.5rem;
+  font-family: monospace;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.ai-helper button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ai-response pre {
+  background: #e5e7eb;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  white-space: pre-wrap;
+}

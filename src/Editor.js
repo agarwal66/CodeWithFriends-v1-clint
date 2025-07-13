@@ -323,7 +323,9 @@ export default function Editor() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [darkMode, setDarkMode] = useState(true);
-
+const [prompt, setPrompt] = useState('');
+const [aiResponse, setAiResponse] = useState('');
+const [loading, setLoading] = useState(false);
   const localStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
   const peerConnectionRef = useRef(null);
@@ -346,7 +348,22 @@ export default function Editor() {
   const handleOutputChange = useCallback(throttle((output) => {
     setOutput(output);
   }, 500), []);
-
+const handleAskAI = async () => {
+  setLoading(true);
+  try {
+    const res = await fetch("https://gemini-a.onrender.com/generate-text", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+    const data = await res.json();
+    setAiResponse(data.generatedText || "No response from AI.");
+  } catch (error) {
+    setAiResponse("⚠ Error communicating with AI.");
+    console.error(error);
+  }
+  setLoading(false);
+};
   useEffect(() => {
     socket.current = io(BACKEND_URL, {
       transports: ['websocket'],
@@ -594,8 +611,23 @@ export default function Editor() {
         <h3>🧾 Output</h3>
         <pre className="output-box">{output}</pre>
       </div>
+      <div className="ai-helper">
+        <h3>🧠 Ask AI for Help</h3>
+        <textarea
+          placeholder="Paste your error or code..."
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          rows={4}
+        />
+        <button onClick={handleAskAI} disabled={loading}>
+          {loading ? 'Asking AI...' : 'Fix It'}
+        </button>
+        <div className="ai-response">
+          {aiResponse && <pre>{aiResponse}</pre>}
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 
