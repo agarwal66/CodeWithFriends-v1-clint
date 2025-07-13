@@ -407,15 +407,34 @@ const handleAskAI = async () => {
   }, [roomId, user?.displayName, handleOutputChange]);
 
   const runCode = async () => {
+  try {
     const res = await fetch(`${BACKEND_URL}/run-code`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source_code: code, stdin: input, language_id: languageId, roomId }),
+      body: JSON.stringify({
+        source_code: code,
+        stdin: input,
+        language_id: languageId,
+        roomId
+      }),
     });
-    const result = await res.json();
-    setOutput(result.stdout || result.stderr || result.compile_output || "No output");
-  };
 
+    const result = await res.json();
+
+    if (result.stdout) {
+      setOutput(result.stdout);
+    } else if (result.stderr) {
+      setOutput("❌ Runtime Error:\n" + result.stderr);
+    } else if (result.compile_output) {
+      setOutput("🛠 Compile Error:\n" + result.compile_output);
+    } else {
+      setOutput("⚠ No output or error received.");
+    }
+  } catch (err) {
+    console.error("RunCode Error:", err);
+    setOutput("❗ Failed to run code. Please check your connection or server logs.");
+  }
+};
   const startVoiceChat = async () => {
     if (isVoiceStarted || peerConnectionRef.current) return;
     setIsVoiceStarted(true);
