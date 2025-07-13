@@ -367,7 +367,277 @@ hr {
   margin-bottom: 20px;
 } */
  /* App.css */
-:root {
+ /* --new 13-07 dasboard code total 256 lines mobile centric  */
+ /* Global Setup */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+/* Container */
+.dashboard-container {
+  max-width: 1100px;
+  margin: 3rem auto;
+  padding: 2rem 2.5rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
+}
+
+/* Topbar Logo & Title */
+.dashboard-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 1.2rem 1rem;
+  text-align: center;
+}
+
+.topbar-logo {
+  height: 48px;
+  width: 48px;
+  object-fit: contain;
+}
+
+.topbar-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 2.5rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-pic {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.user-info h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.user-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.logout-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Button Styles */
+.btn {
+  padding: 10px 16px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+  background-color: #e5e7eb;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+/* Input */
+.room-input {
+  padding: 10px;
+  font-size: 0.92rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  width: 220px;
+}
+
+/* Sections */
+.action-section,
+.rooms-section {
+  margin-top: 2.5rem;
+}
+
+.action-section h3,
+.rooms-section h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  border-left: 4px solid #3b82f6;
+  padding-left: 0.75rem;
+  margin-bottom: 1rem;
+  letter-spacing: 0.3px;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Room Cards */
+.room-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.room-card {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 5px solid #3b82f6;
+  border-top: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.room-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+.room-id {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #111827;
+}
+
+.room-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.stat-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.btn-rejoin {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-rejoin:hover {
+  background-color: #059669;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+/* ---------- Responsive: Mobile Focus ---------- */
+@media (max-width: 768px) {
+  .dashboard-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .logout-container {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 1rem;
+  }
+
+  .room-input {
+    width: 100%;
+  }
+
+  .button-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-topbar {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+ .topbar-logo {
+  height: 64px;              /* was 48px */
+  width: 64px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); /* subtle depth */
+  border-radius: 12px;        /* optional, for soft edges */
+}
+
+
+  .topbar-title {
+    font-size: 1.4rem;
+  }
+}
+
+/* :root {
   --primary-bg: #f0f0f0;
   --secondary-bg: #ffffff;
   --text-color: #333333;
@@ -556,7 +826,7 @@ hr {
 
 .dark .room-input {
   border: 1px solid var(--accent-color);
-}
+} */
 /* --editor css */
 /* Editor Page Styles */
 .editor-container {

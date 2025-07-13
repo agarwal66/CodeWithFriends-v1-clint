@@ -210,6 +210,10 @@ export default function Dashboard() {
     <button className="theme-toggle" onClick={toggleTheme}>
       {darkMode ? "☀️ TERMINAL MODE" : "🌙 CYBER MODE"}
     </button>
+    <div className="dashboard-topbar">
+  <img src="/logo.png" alt="logo" className="topbar-logo" />
+  <h1 className="topbar-title">CodeWithFriends</h1>
+</div>
 
     <header className="dashboard-header">
       <div className="user-info">
