@@ -303,6 +303,8 @@ import './App.css';
 
 const MemoizedCodeMirror = memo(CodeMirror);
 
+// const [blue700, purple600] = useToken('colors', ['blue.700', 'purple.600']);
+
 const MemoizedChat = memo(({ chat, user }) => {
   const chatRef = useRef(null);
   useEffect(() => {
@@ -427,7 +429,8 @@ export default function Editor() {
 
   return (
     <Flex direction="column" minH="100vh" bg={boxBg}>
-      <Flex px={6} py={3} bgGradient="linear(to-r, blue.700, purple.600)" align="center">
+      <Flex px={6} py={3} bgGradient="linear(to-r, var(--chakra-colors-blue-700), var(--chakra-colors-purple-600))"
+align="center">
         <Text fontWeight="bold" fontSize="xl" color="white">Room ID: {roomId}</Text>
         <Spacer />
         <HStack spacing={3}>
