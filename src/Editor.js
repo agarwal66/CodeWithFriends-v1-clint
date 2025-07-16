@@ -286,15 +286,16 @@
 
 // }
 // Updated editor layout with theme switching, avatar dropdown, and working voice chat UI
+// Updated Editor Component with improved Leave Room, Chat Layout, Typing Indicator, Language UI, and Active Users
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import {
   Box, Flex, VStack, HStack, Text, Button, Select, Textarea, Input, Avatar,
   useColorMode, Tabs, TabList, TabPanels, Tab, TabPanel, IconButton, Spacer, Tag,
-  useColorModeValue, useToast, Menu, MenuButton, MenuList, MenuItem
+  useColorModeValue, useToast, Menu, MenuButton, MenuList, MenuItem, Divider
 } from "@chakra-ui/react";
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 import './App.css';
@@ -325,6 +326,7 @@ const MemoizedChat = memo(({ chat, user }) => {
 
 export default function Editor() {
   const { roomId } = useParams();
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const socket = useRef(null);
   const toast = useToast();
@@ -383,7 +385,7 @@ export default function Editor() {
 
   const startVoiceChat = () => {
     setIsVoiceStarted(true);
-    toast({ title: 'Voice chat started', status: 'info', duration: 2000 });
+    toast({ title: '✅ Voice chat started', status: 'success', duration: 2000 });
   };
 
   const handleMute = () => {
@@ -400,6 +402,13 @@ export default function Editor() {
     toast({ title: 'Voice chat ended', status: 'warning', duration: 2000 });
   };
 
+  const leaveRoom = () => {
+    if (socket.current) {
+      socket.current.disconnect();
+    }
+    navigate("/dashboard");
+  };
+
   useEffect(() => {
     socket.current = io(process.env.REACT_APP_API_URL, { transports: ['websocket'], withCredentials: true });
     socket.current.emit('join-room', {
@@ -412,7 +421,7 @@ export default function Editor() {
     socket.current.on("receive-message", ({ sender, message }) => setChat(prev => [...prev, { sender, message }]));
     socket.current.on('user-typing', (username) => {
       setTypingUser(username);
-      setTimeout(() => setTypingUser(null), 1000);
+      setTimeout(() => setTypingUser(null), 1500);
     });
     fetch(`${process.env.REACT_APP_API_URL}/room/${roomId}`, { credentials: 'include' })
       .then((res) => res.json())
@@ -429,11 +438,17 @@ export default function Editor() {
         <Text fontWeight="bold" fontSize="xl" color="white">Room ID: {roomId}</Text>
         <Spacer />
         <HStack spacing={3}>
+          <Select value={languageId} onChange={e => setLanguageId(Number(e.target.value))} size="sm" w="120px" bg="white" color="black">
+            <option value={54}>C++</option>
+            <option value={62}>Java</option>
+            <option value={71}>Python</option>
+            <option value={63}>JavaScript</option>
+          </Select>
+          <Tag size="sm" colorScheme="green">Users: {activeUsers.length}</Tag>
+          <Button onClick={leaveRoom} size="sm" colorScheme="red">Leave Room</Button>
           <Text color="white">{user?.displayName || 'Anonymous'}</Text>
           <Menu>
-            <MenuButton>
-              <Avatar size="sm" name={user?.displayName} cursor="pointer" />
-            </MenuButton>
+            <MenuButton><Avatar size="sm" name={user?.displayName} cursor="pointer" /></MenuButton>
             <MenuList fontSize="sm">
               <MenuItem><b>Name:</b> {user?.displayName || 'N/A'}</MenuItem>
               <MenuItem><b>Email:</b> {user?.emails?.[0]?.value || 'N/A'}</MenuItem>
@@ -447,6 +462,7 @@ export default function Editor() {
         <Flex direction="column" w={{ base: "100%", md: "25%" }} bg={panelBg} rounded="lg" p={3} shadow="md">
           <Text fontWeight="bold" mb={2}>💬 Chat</Text>
           <MemoizedChat chat={chat} user={user} />
+          {typingUser && <Text fontSize="xs" color="gray.400">{typingUser} is typing...</Text>}
           <Input
             placeholder="Type your message..."
             bg={inputBg}
@@ -463,6 +479,9 @@ export default function Editor() {
               }
             }}
           />
+          <Divider my={2} />
+          <Text fontWeight="bold" mb={1}>👥 Active Users</Text>
+          {activeUsers.map((u, idx) => <Text key={idx} fontSize="sm">• {u}</Text>)}
         </Flex>
 
         <Flex direction="column" w={{ base: "100%", md: "75%" }} gap={4}>
@@ -474,7 +493,6 @@ export default function Editor() {
               onChange={handleChange}
               theme={colorMode === 'dark' ? 'dark' : 'light'}
             />
-            {typingUser && <Text fontSize="xs" color="gray.400" mt={1}>{typingUser} is typing...</Text>}
           </Box>
 
           <Tabs variant="enclosed" colorScheme="purple">
@@ -515,6 +533,7 @@ export default function Editor() {
                 <Button colorScheme="blue" onClick={startVoiceChat}>Start Voice Chat</Button>
                 {isVoiceStarted && (
                   <HStack mt={3}>
+                    <Tag colorScheme="green">✅ Voice Started</Tag>
                     <Button onClick={handleMute}>{isMuted ? 'Unmute' : 'Mute'}</Button>
                     <Button colorScheme="red" onClick={handleStop}>Stop</Button>
                   </HStack>
@@ -531,7 +550,6 @@ export default function Editor() {
     </Flex>
   );
 }
-
 
 
 // Updated editor layout with theme switching, avatar dropdown, and working voice chat UI
