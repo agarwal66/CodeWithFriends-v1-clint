@@ -307,13 +307,14 @@ const MemoizedChat = memo(({ chat, user }) => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [chat]);
   return (
-    <VStack align="stretch" spacing={2} ref={chatRef} h="100%" overflowY="auto">
-      {chat.map((msg, i) => (
-        <Box key={i} bg={msg.sender === user?.displayName ? 'blue.500' : 'gray.700'} color="white" p={2} borderRadius="md">
-          <Text fontSize="sm"><b>{msg.sender}:</b> {msg.message}</Text>
-        </Box>
-      ))}
-    </VStack>
+  <VStack align="stretch" spacing={2} ref={chatRef} h="300px" overflowY="auto">
+  {chat.map((msg, i) => (
+    <Box key={i} bg={msg.sender === user?.displayName ? 'blue.500' : 'gray.700'} color="white" p={2} borderRadius="md">
+      <Text fontSize="sm"><b>{msg.sender}:</b> {msg.message}</Text>
+    </Box>
+  ))}
+</VStack>
+
   );
 });
 
@@ -345,7 +346,9 @@ const [isSpeaking, setIsSpeaking] = useState(false);
   const { colorMode, toggleColorMode } = useColorMode();
   const inputBg = useColorModeValue("white", "gray.700");
   const inputColor = useColorModeValue("black", "white");
-
+const inputPlaceholder = useColorModeValue("gray.500", "gray.400");
+const boxBg = useColorModeValue("white", "gray.800");
+const panelBg = useColorModeValue("gray.100", "gray.900");
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
   const emitTyping = useCallback(
@@ -415,7 +418,7 @@ const [isSpeaking, setIsSpeaking] = useState(false);
     socket.current.on("receive-message", ({ sender, message }) => setChat(prev => [...prev, { sender, message }]));
     socket.current.on('user-typing', (username) => {
       setTypingUser(username);
-      setTimeout(() => setTypingUser(null), 1500);
+      setTimeout(() => setTypingUser(null), 3000);
     });
 
     fetch(`${BACKEND_URL}/room/${roomId}`, { credentials: 'include' })
@@ -506,44 +509,54 @@ const detectSpeaking = (stream) => {
 };
 
   return (
-    <Flex direction="column" minH="100vh" bg={useColorModeValue("gray.50", "gray.900")}>
-      <Flex px={6} py={3} bg="blue.600" align="center">
-        <Text fontWeight="bold" fontSize="xl" color="white">Room ID: {roomId}</Text>
-        <Spacer />
-        <HStack spacing={3}>
-          <Select value={languageId} onChange={e => setLanguageId(Number(e.target.value))} size="sm" w="120px">
-            <option value={54}>C++</option>
-            <option value={62}>Java</option>
-            <option value={71}>Python</option>
-            <option value={63}>JavaScript</option>
-          </Select>
-          <Tag size="sm" colorScheme="green">Users: {activeUsers.length}</Tag>
-          <Button onClick={leaveRoom} size="sm" colorScheme="red">Leave Room</Button>
-          <Text color="white">{user?.displayName || 'Anonymous'}</Text>
-          <Menu>
-            <MenuButton><Avatar size="sm" name={user?.displayName} cursor="pointer" /></MenuButton>
-            <MenuList fontSize="sm">
-              <MenuItem><b>Name:</b> {user?.displayName || 'N/A'}</MenuItem>
-              <MenuItem><b>Email:</b> {user?.emails?.[0]?.value || 'N/A'}</MenuItem>
-            </MenuList>
-          </Menu>
-          <IconButton icon={colorMode === "dark" ? <SunIcon /> : <MoonIcon />} onClick={toggleColorMode} />
-        </HStack>
-      </Flex>
+  <Flex direction="column" minH="100vh" bg={useColorModeValue("gray.50", "gray.900")}>
+    <Flex px={6} py={3} bg="blue.600" align="center">
+      <Text fontWeight="bold" fontSize="xl" color="white">Room ID: {roomId}</Text>
+      <Spacer />
+      <HStack spacing={3}>
+        <Select value={languageId} onChange={e => setLanguageId(Number(e.target.value))} size="sm" w="120px">
+          <option value={54}>C++</option>
+          <option value={62}>Java</option>
+          <option value={71}>Python</option>
+          <option value={63}>JavaScript</option>
+        </Select>
+        <Tag size="sm" colorScheme="green">Users: {activeUsers.length}</Tag>
+        <Button onClick={leaveRoom} size="sm" colorScheme="red">Leave Room</Button>
+        <Text color="white">{user?.displayName || 'Anonymous'}</Text>
+        <Menu>
+          <MenuButton>
+            <Avatar size="sm" name={user?.displayName} cursor="pointer" />
+          </MenuButton>
+          <MenuList fontSize="sm">
+            <MenuItem><b>Name:</b> {user?.displayName || 'N/A'}</MenuItem>
+            <MenuItem><b>Email:</b> {user?.emails?.[0]?.value || 'N/A'}</MenuItem>
+          </MenuList>
+        </Menu>
+        <IconButton icon={colorMode === "dark" ? <SunIcon /> : <MoonIcon />} onClick={toggleColorMode} />
+      </HStack>
+    </Flex>
 
-      <Flex flex="1" direction="row" p={4} gap={4}>
-        <Flex direction="column" w={{ base: "100%", md: "25%" }} bg="gray.800" rounded="lg" p={3} shadow="md">
-          <Text fontWeight="bold" mb={2} color="white">💬 Chat</Text>
-          <MemoizedChat chat={chat} user={user} />
-          {typingUser && <Text fontSize="xs" color="gray.400">{typingUser} is typing...</Text>}
-          <Input
-            placeholder="Type your message..."
-            bg={inputBg}
-            color={inputColor}
-            mt={2}
-            value={message}
-            onChange={e => setMessage(e.target.value)}
-               onKeyDown={(e) => {
+    <Flex flex="1" direction="row" p={4} gap={4}>
+      {/* Chat and Users Sidebar */}
+      <Flex direction="column" w={{ base: "100%", md: "25%" }} bg="gray.800" rounded="lg" p={3} shadow="md">
+        <Text fontWeight="bold" mb={2} color="white">💬 Chat</Text>
+        <Box flex="1" overflowY="auto" mb={2}>
+    <MemoizedChat chat={chat} user={user} />
+  </Box>
+    {typingUser && (
+    <Text fontSize="sm" color="yellow.400" mb={1}>
+    📝 {typingUser} is typing...
+    </Text>
+)}
+
+        <Input
+          placeholder="Type your message..."
+          bg={inputBg}
+          color={inputColor}
+          mt={2}
+          value={message}
+          onChange={e => setMessage(e.target.value)}
+          onKeyDown={(e) => {
             if (e.key === "Enter" && message.trim()) {
               socket.current.emit("send-message", {
                 roomId,
@@ -554,66 +567,115 @@ const detectSpeaking = (stream) => {
               setChat(prev => [...prev, { sender: user?.displayName, message }]);
             }
           }}
+        />
+        <Text fontWeight="bold" mt={3} color="white">👥 Active Users</Text>
+        {activeUsers.map((u, idx) => (
+  <Text key={idx} fontSize="sm" color="gray.300">• {u}</Text>
+))}
+
+      </Flex>
+
+      {/* Code + Tabs Section */}
+      <Flex direction="column" w={{ base: "100%", md: "75%" }} gap={4}>
+        {/* Code Editor */}
+        <Box rounded="lg" bg="gray.800" p={3} shadow="md">
+          <MemoizedCodeMirror
+            value={code}
+            height="300px"
+            extensions={[javascript()]}
+            onChange={handleChange}
+            theme={colorMode === 'dark' ? 'dark' : 'light'}
           />
-          <Text fontWeight="bold" mt={3} color="white">👥 Active Users</Text>
-          {activeUsers.map((u, idx) => <Text key={idx} fontSize="sm" color="gray.300">• {u}</Text>)}
-        </Flex>
+        </Box>
 
-        <Flex direction="column" w={{ base: "100%", md: "75%" }} gap={4}>
-          <Box rounded="lg" bg="gray.800" p={3} shadow="md">
-            <MemoizedCodeMirror
-              value={code}
-              height="300px"
-              extensions={[javascript()]}
-              onChange={handleChange}
-              theme={colorMode === 'dark' ? 'dark' : 'light'}
-            />
-          </Box>
+        {/* Tabs */}
+        <Tabs variant="enclosed" colorScheme="purple">
+          <TabList>
+            <Tab>Output</Tab>
+            <Tab>Ask AI</Tab>
+          </TabList>
+          <TabPanels>
+            {/* Output Tab */}
+            <TabPanel>
+              <Textarea
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                placeholder="Custom input..."
+                bg={inputBg}
+                color={inputColor}
+                mb={3}
+              />
+              <Box bg="gray.700" color="white" p={3} rounded="md" fontFamily="mono">{output}</Box>
+              <Button mt={3} colorScheme="blue" onClick={runCode}>Run Code</Button>
+            </TabPanel>
 
-          <Tabs variant="enclosed" colorScheme="purple">
-            <TabList>
-              <Tab>Output</Tab>
-              <Tab>Ask AI</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
+            {/* Ask AI Tab */}
+            <TabPanel>
+              <Box bg={boxBg} p={4} borderRadius="md" shadow="md">
+                <Text fontSize="lg" fontWeight="bold" mb={2}>🧠 Ask AI for Help</Text>
                 <Textarea
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  placeholder="Custom input..."
+                  placeholder="Paste your error or code..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  rows={4}
                   bg={inputBg}
                   color={inputColor}
+                  borderColor="gray.600"
+                  _placeholder={{ color: inputPlaceholder }}
                   mb={3}
                 />
-                <Box bg="gray.700" color="white" p={3} rounded="md" fontFamily="mono">{output}</Box>
-                <Button mt={3} colorScheme="blue" onClick={runCode}>Run Code</Button>
-              </TabPanel>
-              {isVoiceStarted && (
-  <HStack mt={3}>
-    <Text color="green.300">🔊 Voice Chat Active</Text>
-    {isSpeaking && <Text color="yellow.300">🗣 {user?.displayName} is speaking...</Text>}
-    <Button onClick={handleMute}>{isMuted ? '🔇 Unmute' : '🎤 Mute'}</Button>
-    <Button colorScheme="red" onClick={handleStop}>🛑 Stop</Button>
-    <audio ref={remoteAudioRef} autoPlay />
-  </HStack>
-)}
-<Button mt={3} onClick={startVoiceChat} colorScheme="purple">🎙 Start Voice Chat</Button>
+                <Button
+                  onClick={handleAskAI}
+                  isLoading={loading}
+                  colorScheme="green"
+                  width="100%"
+                >
+                  Fix It
+                </Button>
+                {aiResponse !== '' && (
+                  <Box
+                    mt={4}
+                    bg="gray.900"
+                    color="teal.100"
+                    p={3}
+                    borderRadius="md"
+                    fontFamily="mono"
+                    whiteSpace="pre-wrap"
+                  >
+                    {aiResponse}
+                  </Box>
+                )}
+              </Box>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
 
-              <TabPanel>
-                <Textarea
-                  value={prompt}
-                  onChange={e => setPrompt(e.target.value)}
-                  placeholder="Paste error/code..."
-                  bg={inputBg}
-                  color={inputColor}
-                />
-                <Button mt={3} colorScheme="green" onClick={handleAskAI} isLoading={loading}>Fix It</Button>
-                <Box mt={3} bg="gray.800" color="teal.200" p={2} rounded="md" fontFamily="mono">{aiResponse}</Box>
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
-        </Flex>
+        {/* Voice Chat Controls (below tabs) */}
+       {isVoiceStarted ? (
+      <Box mt={4} bg="green.800" p={3} rounded="md" shadow="md" border="1px solid #38A169">
+      <HStack spacing={4} align="center">
+      <Text color="green.200" fontWeight="bold" fontSize="md">✅ Voice Chat Activated</Text>
+      {isSpeaking && (
+        <Text color="yellow.300" fontWeight="semibold">🗣 {user?.displayName} is speaking...</Text>
+      )}
+      <Spacer />
+      <Button size="sm" onClick={handleMute} colorScheme="yellow">
+        {isMuted ? '🔇 Unmute' : '🎤 Mute'}
+        </Button>
+        <Button size="sm" colorScheme="red" onClick={handleStop}>
+        🛑 Stop
+        </Button>
+        <audio ref={remoteAudioRef} autoPlay />
+      </HStack>
+    </Box>
+    ) : (
+    <Button mt={3} onClick={startVoiceChat} colorScheme="purple">
+      🎙 Start Voice Chat
+    </Button>
+)}
       </Flex>
     </Flex>
-  );
+  </Flex>
+);
 }
+
