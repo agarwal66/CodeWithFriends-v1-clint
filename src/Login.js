@@ -151,10 +151,11 @@ export default function LoginPage() {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="logo">CodeWithFriends</div>
-          <h2 className="auth-title">
-            {showRegister ? "Create Account" : "Welcome Back"}
-          </h2>
+        <div className="logo">CodeWithFriends</div>
+  <h1 className="welcome-text">
+    {showRegister ? "Join the collab revolution" : "Welcome Back"}
+  </h1>
+
           <p className="auth-subtitle">
             {showRegister
               ? "Get started with your account"
