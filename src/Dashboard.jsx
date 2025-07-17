@@ -118,38 +118,56 @@
 
 
 
-
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 import css from "./App.css";
+import {
+  Box,
+  Flex,
+  Text,
+  Button,
+  Stack,
+  Input,
+  Avatar,
+  Image,
+  SimpleGrid,
+  HStack,
+} from "@chakra-ui/react"; // ✅ Chakra UI import
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
-  const [joinCode, setJoinCode] = useState('');
+  const [joinCode, setJoinCode] = useState("");
   const [rooms, setRooms] = useState([]);
   const [darkMode, setDarkMode] = useState(true);
   const navigate = useNavigate();
 
   // ✅ Fetch profile
+  // useEffect(() => {
+  //   fetch(`${process.env.REACT_APP_BACKEND_URL}/profile`, {
+  //     method:"GET",
+  //     credentials: "include",
+  //   })
+  //     .then((res) => {
+  //       if (!res.ok) throw new Error("Not logged in");
+  //       return res.json();
+  //     })
+  //     .then((data) => {
+  //       if (data?.displayName) {
+  //         setUser(data);
+  //         localStorage.setItem("user", JSON.stringify(data));
+  //       } else {
+  //         navigate("/");
+  //       }
+  //     })
+  //     .catch(() => navigate("/"));
+  // }, []);
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/profile`, {
-      method:"GET",
-      credentials: "include",
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Not logged in");
-        return res.json();
-      })
-      .then((data) => {
-        if (data?.displayName) {
-          setUser(data);
-          localStorage.setItem("user", JSON.stringify(data));
-        } else {
-          navigate("/");
-        }
-      })
-      .catch(() => navigate("/"));
+    const mockUser = {
+      displayName: "Test User",
+      photos: [{ value: "https://via.placeholder.com/80" }],
+    };
+    setUser(mockUser);
   }, []);
 
   useEffect(() => {
@@ -162,128 +180,118 @@ export default function Dashboard() {
   // ✅ Fetch grouped rooms from room_history
   useEffect(() => {
     if (user) {
-      fetch(`${process.env.REACT_APP_BACKEND_URL}/user-rooms`,
-        // "http://localhost:4000/user-rooms", 
+      fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/user-rooms`,
+        // "http://localhost:4000/user-rooms",
         {
-        credentials: "include",
-      })
+          credentials: "include",
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           const grouped = {};
-          data.forEach(room => {
+          data.forEach((room) => {
             const ts = new Date(room.timestamp).getTime();
             if (grouped[room.roomId]) {
               grouped[room.roomId].count += 1;
-              grouped[room.roomId].latest = Math.max(grouped[room.roomId].latest, ts);
+              grouped[room.roomId].latest = Math.max(
+                grouped[room.roomId].latest,
+                ts
+              );
             } else {
               grouped[room.roomId] = {
                 roomId: room.roomId,
                 count: 1,
-                latest: ts
+                latest: ts,
               };
             }
           });
-          const sorted = Object.values(grouped).sort((a, b) => b.latest - a.latest);
+          const sorted = Object.values(grouped).sort(
+            (a, b) => b.latest - a.latest
+          );
           setRooms(sorted);
         })
-        .catch(err => console.error("Room fetch failed:", err));
+        .catch((err) => console.error("Room fetch failed:", err));
     }
   }, [user]);
 
-  const toggleTheme = () => setDarkMode(prev => !prev);
-  const logout = () => window.open(`${process.env.REACT_APP_BACKEND_URL}/auth/logout`, "_self");
+  const toggleTheme = () => setDarkMode((prev) => !prev);
+  const logout = () =>
+    window.open(`${process.env.REACT_APP_BACKEND_URL}/auth/logout`, "_self");
   const createRoom = () => navigate(`/editor/${uuidv4()}`);
-  const joinRoom = () => joinCode.trim() && navigate(`/editor/${joinCode.trim()}`);
+  const joinRoom = () =>
+    joinCode.trim() && navigate(`/editor/${joinCode.trim()}`);
   const handleJoinAgain = (roomId) => navigate(`/editor/${roomId}`);
 
   if (!user) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <div style={{ padding: "2rem", textAlign: "center" }}>
         <h3>⏳ Loading your dashboard...</h3>
         <p>If this takes too long, try refreshing or re-login.</p>
       </div>
     );
   }
 
-  return (
-  <div className="dashboard-container dark">
-    <button className="theme-toggle" onClick={toggleTheme}>
-      {darkMode ? "☀️ TERMINAL MODE" : "🌙 CYBER MODE"}
-    </button>
-    <div className="dashboard-topbar">
-  <img src="/logo.png" alt="logo" className="topbar-logo" />
-  <h1 className="topbar-title">CodeWithFriends</h1>
-</div>
+return (
+  <Box bg={darkMode ? "gray.900" : "gray.50"} minH="100vh" p={6} color={darkMode ? "white" : "black"}>
+    <Flex justify="space-between" align="center" mb={6}>
+      <HStack>
+        <Image src="/logo.png" boxSize="40px" />
+        <Text fontSize="2xl" fontWeight="bold">CodeWithFriends</Text>
+      </HStack>
+      <Button onClick={logout} colorScheme="red" leftIcon={<span>⏻</span>}>Logout</Button>
+    </Flex>
 
-    <header className="dashboard-header">
-      <div className="user-info">
-        <img src={user.photos?.[0]?.value} alt="profile" className="profile-pic" />
-        <div>
-          <h2>USER: {user.displayName}</h2>
-          <p>SYSTEM ACCESS GRANTED</p>
-        </div>
-      </div>
-      <button className="btn btn-primary" onClick={logout}>
-        <span className="icon">⏻</span> LOGOUT
-      </button>
-    </header>
+    <Flex align="center" mb={6}>
+      <Avatar src={user.photos?.[0]?.value} name={user.displayName} mr={4} />
+      <Box>
+        <Text fontSize="xl">USER: {user.displayName}</Text>
+        <Text fontSize="sm" color="gray.400">SYSTEM ACCESS GRANTED</Text>
+      </Box>
+    </Flex>
 
-    <section className="action-section">
-      <h3>// COLLABORATION TERMINAL</h3>
-      <div className="button-group">
-        <button className="btn btn-primary" onClick={createRoom}>
-          <span className="icon">+</span> NEW SESSION
-        </button>
-        <input
-          type="text"
-          placeholder="ENTER ROOM CODE..."
+    <Box bg={darkMode ? "gray.800" : "white"} p={5} borderRadius="lg" mb={6} shadow="md">
+      <Button onClick={toggleTheme}>{darkMode ? "Light Mode" : "Dark Mode"}</Button>
+      <Text fontSize="lg" fontWeight="semibold" mb={4}>// COLLABORATION TERMINAL</Text>
+      <Stack direction={{ base: "column", md: "row" }} spacing={4}>
+        <Button colorScheme="blue" onClick={createRoom} leftIcon={<span>+</span>}>New Session</Button>
+        <Input
+          placeholder="Enter room code..."
           value={joinCode}
           onChange={(e) => setJoinCode(e.target.value)}
-          className="room-input"
         />
-        <button className="btn" onClick={joinRoom}>
-          <span className="icon">↗</span> CONNECT
-        </button>
-        <button className="btn" onClick={() => navigate('/history')}>
-          <span className="icon">📜</span> ACCESS LOGS
-        </button>
-      </div>
-    </section>
+        <Button colorScheme="green" onClick={joinRoom} leftIcon={<span>↗</span>}>Connect</Button>
+        <Button onClick={() => navigate("/history")} leftIcon={<span>📜</span>}>Access Logs</Button>
+      </Stack>
+    </Box>
 
-    <section className="rooms-section">
-      <h3>// ACTIVE SESSIONS</h3>
+    <Box>
+      <Text fontSize="lg" fontWeight="semibold" mb={3}>// ACTIVE SESSIONS</Text>
       {rooms.length === 0 ? (
-        <div className="empty-state">
-          <p>NO ACTIVE SESSIONS DETECTED</p>
-        </div>
+        <Text>No active sessions detected.</Text>
       ) : (
-        <div className="room-list">
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5}>
           {rooms.map((room, index) => (
-            <div className="room-card" key={index}>
-              <div className="room-id">ID: {room.roomId}</div>
-              <div className="room-stats">
-                <div className="stat">
-                  <div className="stat-label">ACCESS COUNT</div>
-                  <div className="stat-value">{room.count}</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-label">LAST ENTRY</div>
-                  <div className="stat-value">
-                    {new Date(room.latest).toLocaleString()}
-                  </div>
-                </div>
-              </div>
-              <button
-                className="btn-rejoin"
-                onClick={() => handleJoinAgain(room.roomId)}
-              >
-                <span className="icon">⟳</span> RE-ESTABLISH CONNECTION
-              </button>
-            </div>
+            <Box key={index} borderWidth="1px" borderRadius="md" p={4} bg={darkMode ? "gray.800" : "white"}>
+              <Text fontWeight="bold">ID: {room.roomId}</Text>
+              <HStack justify="space-between" mt={2}>
+                <Box>
+                  <Text fontSize="sm" color="gray.500">Access Count</Text>
+                  <Text>{room.count}</Text>
+                </Box>
+                <Box>
+                  <Text fontSize="sm" color="gray.500">Last Entry</Text>
+                  <Text>{new Date(room.latest).toLocaleString()}</Text>
+                </Box>
+              </HStack>
+              <Button mt={4} size="sm" colorScheme="teal" onClick={() => handleJoinAgain(room.roomId)}>
+                ⟳ Re-establish Connection
+              </Button>
+            </Box>
           ))}
-        </div>
+        </SimpleGrid>
       )}
-    </section>
-  </div>
+    </Box>
+  </Box>
 );
 }
