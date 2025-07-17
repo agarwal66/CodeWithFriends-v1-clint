@@ -292,6 +292,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
+import throttle from 'lodash.throttle';
 import {
   Box, Flex, VStack, HStack, Text, Button, Select, Textarea, Input, Avatar,
   useColorMode, Tabs, TabList, TabPanels, Tab, TabPanel, IconButton, Spacer, Tag,
@@ -363,24 +364,38 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
     socket.current.emit('send-code', { roomId, code: value });
     emitTyping(user?.displayName || "Someone");
   };
+  const handleOutputChange = useCallback(throttle((output) => {
+    setOutput(output);
+  }, 500), []);
+   const runCode = async () => {
+  try {
+    const res = await fetch(`${BACKEND_URL}/run-code`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        source_code: code,
+        stdin: input,
+        language_id: languageId,
+        roomId
+      }),
+    });
 
-  const runCode = async () => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/run-code`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source_code: code, stdin: input, language_id: languageId, roomId }),
-      });
-      const result = await res.json();
-      if (result.stdout) setOutput(result.stdout);
-      else if (result.stderr) setOutput("❌ Runtime Error:\n" + result.stderr);
-      else if (result.compile_output) setOutput("🛠 Compile Error:\n" + result.compile_output);
-      else setOutput("⚠ No output or error received.");
-    } catch (err) {
-      console.error("RunCode Error:", err);
-      setOutput("❗ Failed to run code. Please check your connection or server logs.");
+    const result = await res.json();
+
+    if (result.stdout) {
+      setOutput(result.stdout);
+    } else if (result.stderr) {
+      setOutput("❌ Runtime Error:\n" + result.stderr);
+    } else if (result.compile_output) {
+      setOutput("🛠 Compile Error:\n" + result.compile_output);
+    } else {
+      setOutput("⚠ No output or error received.");
     }
-  };
+  } catch (err) {
+    console.error("RunCode Error:", err);
+    setOutput("❗ Failed to run code. Please check your connection or server logs.");
+  }
+};
 
   const handleAskAI = async () => {
     setLoading(true);
@@ -412,7 +427,7 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
       username: user?.displayName || "Anonymous",
       email: user?.emails?.[0]?.value,
     });
-
+    socket.current.on("code-output", handleOutputChange);
     socket.current.on('room-users', (users = []) => setActiveUsers(users));
     socket.current.on("code-update", setCode);
     socket.current.on("receive-message", ({ sender, message }) => setChat(prev => [...prev, { sender, message }]));
@@ -430,6 +445,7 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
 
     return () => socket.current && socket.current.disconnect();
   }, [roomId]);
+  
 const startVoiceChat = async () => {
   if (isVoiceStarted || peerConnectionRef.current) return;
   setIsVoiceStarted(true);
