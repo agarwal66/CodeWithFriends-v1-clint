@@ -649,17 +649,19 @@ const detectSpeaking = (stream) => {
                   Fix It
                 </Button>
                 {aiResponse !== '' && (
-                  <Box
-                    mt={4}
-                    bg="gray.900"
-                    color="teal.100"
-                    p={3}
-                    borderRadius="md"
-                    fontFamily="mono"
-                    whiteSpace="pre-wrap"
-                  >
-                    {aiResponse}
-                  </Box>
+                <Box mt={4} bg="gray.900" color="teal.100" p={3} borderRadius="md" fontFamily="mono" whiteSpace="pre-wrap" position="relative">
+  <IconButton
+    icon={<span>📋</span>}
+    aria-label="Copy"
+    size="sm"
+    position="absolute"
+    top="8px"
+    right="8px"
+    onClick={() => navigator.clipboard.writeText(aiResponse)}
+  />
+  {aiResponse}
+</Box>
+
                 )}
               </Box>
             </TabPanel>
