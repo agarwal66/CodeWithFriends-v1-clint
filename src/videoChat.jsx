@@ -1,214 +1,178 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Box, Button, HStack, Text, Center } from '@chakra-ui/react';
+import { Box, Button, Text, Center, VStack, SimpleGrid } from '@chakra-ui/react';
 
-const VideoChat = ({ isVideoMuted = false, socket, roomId, user }) => {
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
-  const peerConnectionRef = useRef(null);
-  const localStreamRef = useRef(null);
+const ICE_SERVERS = {
+  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+};
 
-  const [isVideoStarted, setIsVideoStarted] = useState(false);
-  const [loading, setLoading] = useState(false);
+const VideoChat = ({ socket, roomId, user }) => {
+  const localVideoRef = useRef(null);
+  const localStreamRef = useRef(null);
+  const peerConnectionsRef = useRef({});
+  const [remoteStreams, setRemoteStreams] = useState({});
+  const [isStarted, setIsStarted] = useState(false);
 
-  const stopVideoChat = useCallback(() => {
-    setIsVideoStarted(false);
+  // 🔁 Start local camera
+  const startLocalStream = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localVideoRef.current.srcObject = stream;
+    localStreamRef.current = stream;
+    setIsStarted(true);
+    socket.emit('ready', { roomId });
+  };
 
-    if (peerConnectionRef.current) {
-      peerConnectionRef.current.close();
-      peerConnectionRef.current = null;
-    }
+  const createPeerConnection = (targetSocketId) => {
+    const pc = new RTCPeerConnection(ICE_SERVERS);
+    peerConnectionsRef.current[targetSocketId] = pc;
 
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach(track => track.stop());
-      localStreamRef.current = null;
-    }
+    // Add local tracks
+    localStreamRef.current.getTracks().forEach(track => {
+      pc.addTrack(track, localStreamRef.current);
+    });
 
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = null;
-    }
+    // Send ICE
+    pc.onicecandidate = (e) => {
+      if (e.candidate) {
+        socket.emit('ice-candidate', {
+          target: targetSocketId,
+          candidate: e.candidate,
+        });
+      }
+    };
 
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = null;
-    }
+    // When remote track arrives
+    pc.ontrack = (e) => {
+      setRemoteStreams(prev => ({
+        ...prev,
+        [targetSocketId]: e.streams[0]
+      }));
+    };
 
-    if (socket) {
-      socket.off('video-answer');
-      socket.off('video-offer');
-      socket.off('ice-candidate');
-      socket.off('ready-for-call');
-    }
-  }, [socket]);
+    return pc;
+  };
 
-  const startVideoChat = useCallback(
-    async (isInitiator = false) => {
-      if (!socket || isVideoStarted || peerConnectionRef.current) return;
+  const handleUserJoin = async ({ socketId }) => {
+    console.log("👋 New user joined:", socketId);
+    const pc = createPeerConnection(socketId);
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
 
-      setIsVideoStarted(true);
-      setLoading(true);
+    socket.emit('video-offer', {
+      target: socketId,
+      offer,
+    });
+  };
 
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localStreamRef.current = stream;
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
+  const handleVideoOffer = async ({ from, offer }) => {
+    const pc = createPeerConnection(from);
+    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
 
-        const pc = new RTCPeerConnection();
-        peerConnectionRef.current = pc;
+    socket.emit('video-answer', {
+      target: from,
+      answer,
+    });
+  };
 
-        stream.getTracks().forEach(track => pc.addTrack(track, stream));
+  const handleVideoAnswer = async ({ from, answer }) => {
+    const pc = peerConnectionsRef.current[from];
+    if (!pc) return;
+    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+  };
 
-        pc.ontrack = (event) => {
-          if (remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = event.streams[0];
-          }
-        };
+  const handleIceCandidate = async ({ from, candidate }) => {
+    const pc = peerConnectionsRef.current[from];
+    if (!pc) return;
+    await pc.addIceCandidate(new RTCIceCandidate(candidate));
+  };
 
-        pc.onicecandidate = (e) => {
-          if (e.candidate) {
-            socket.emit('ice-candidate', { roomId, candidate: e.candidate });
-          }
-        };
+  const handleUserLeave = ({ socketId }) => {
+    console.log("❌ User disconnected:", socketId);
+    const pc = peerConnectionsRef.current[socketId];
+    if (pc) pc.close();
+    delete peerConnectionsRef.current[socketId];
+    setRemoteStreams(prev => {
+      const updated = { ...prev };
+      delete updated[socketId];
+      return updated;
+    });
+  };
 
-        if (isInitiator) {
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          socket.emit('video-offer', { roomId, offer });
-        }
-      } catch (err) {
-        console.error("Error starting video:", err);
-        stopVideoChat();
-      } finally {
-        setLoading(false);
-      }
-    },
-    [socket, roomId, isVideoStarted, stopVideoChat]
-  );
+  const stopVideoChat = () => {
+    Object.values(peerConnectionsRef.current).forEach(pc => pc.close());
+    peerConnectionsRef.current = {};
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
+    }
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+    setRemoteStreams({});
+    setIsStarted(false);
+    socket.emit('leave-room', { roomId });
+  };
 
-  // 🔄 Handle signaling events
-  useEffect(() => {
-    if (!socket) return;
+  useEffect(() => {
+    if (!socket) return;
 
-    const handleVideoOffer = async ({ offer }) => {
-      let pc = peerConnectionRef.current;
+    socket.emit('join-room', { roomId, username: user?.displayName });
 
-      if (!pc || pc.signalingState === "closed") {
-        pc = new RTCPeerConnection();
-        peerConnectionRef.current = pc;
+    socket.on('user-joined', handleUserJoin);
+    socket.on('video-offer', handleVideoOffer);
+    socket.on('video-answer', handleVideoAnswer);
+    socket.on('ice-candidate', handleIceCandidate);
+    socket.on('user-left', handleUserLeave);
 
-        localStreamRef.current?.getTracks().forEach(track => {
-          pc.addTrack(track, localStreamRef.current);
-        });
+    return () => {
+      socket.off('user-joined', handleUserJoin);
+      socket.off('video-offer', handleVideoOffer);
+      socket.off('video-answer', handleVideoAnswer);
+      socket.off('ice-candidate', handleIceCandidate);
+      socket.off('user-left', handleUserLeave);
+    };
+  }, [socket, roomId]);
 
-        pc.ontrack = (event) => {
-          if (remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = event.streams[0];
-          }
-        };
+  return (
+    <Box p={4} bg="gray.700" borderRadius="md" minH="300px" mb={4}>
+      <Text fontSize="lg" color="white" mb={2}>
+        🎥 Video Chat - {user?.displayName}
+      </Text>
 
-        pc.onicecandidate = (e) => {
-          if (e.candidate) {
-            socket.emit("ice-candidate", { roomId, candidate: e.candidate });
-          }
-        };
-      }
+      <SimpleGrid columns={[1, 2, 3]} spacing={4}>
+        <video
+          ref={localVideoRef}
+          autoPlay
+          muted
+          playsInline
+          style={{ width: '100%', borderRadius: '8px', backgroundColor: '#000' }}
+        />
+        {Object.entries(remoteStreams).map(([id, stream]) => (
+          <video
+            key={id}
+            autoPlay
+            playsInline
+            style={{ width: '100%', borderRadius: '8px', backgroundColor: '#000' }}
+            ref={(el) => {
+              if (el && stream) el.srcObject = stream;
+            }}
+          />
+        ))}
+      </SimpleGrid>
 
-      console.log("📨 Received video offer");
-      await pc.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      socket.emit("video-answer", { roomId, answer });
-    };
-
-    const handleVideoAnswer = async ({ answer }) => {
-      const pc = peerConnectionRef.current;
-      if (!pc || pc.signalingState === 'closed') return;
-      await pc.setRemoteDescription(new RTCSessionDescription(answer));
-    };
-
-    const handleCandidate = async ({ candidate }) => {
-      const pc = peerConnectionRef.current;
-      if (!pc || pc.signalingState === 'closed') return;
-      try {
-        await pc.addIceCandidate(new RTCIceCandidate(candidate));
-      } catch (e) {
-        console.warn("ICE error:", e.message);
-      }
-    };
-
-    const handleReady = () => {
-      if (!isVideoStarted) {
-        console.log("🟢 Received ready-for-call, starting as initiator");
-        startVideoChat(true);
-      }
-    };
-
-    socket.on("video-offer", handleVideoOffer);
-    socket.on("video-answer", handleVideoAnswer);
-    socket.on("ice-candidate", handleCandidate);
-    socket.on("ready-for-call", handleReady);
-
-    // Notify others you are ready
-    socket.emit("ready-for-call", { roomId });
-
-    return () => {
-      socket.off("video-offer", handleVideoOffer);
-      socket.off("video-answer", handleVideoAnswer);
-      socket.off("ice-candidate", handleCandidate);
-      socket.off("ready-for-call", handleReady);
-    };
-  }, [socket, roomId, startVideoChat, isVideoStarted]);
-
-  // 🎥 Mute/unmute local video
-  useEffect(() => {
-    if (localVideoRef.current?.srcObject) {
-      const videoTrack = localVideoRef.current.srcObject.getVideoTracks()[0];
-      if (videoTrack) videoTrack.enabled = !isVideoMuted;
-    }
-  }, [isVideoMuted]);
-
-  return (
-    <Box
-      p={3}
-      bg="gray.800"
-      borderRadius="md"
-      mb={4}
-      minH="280px"
-      transition="all 0.3s ease"
-    >
-      <Text fontSize="md" fontWeight="bold" color="white" mb={2}>
-        🎥 Video Chat - {user?.displayName}
-      </Text>
-
-      <HStack spacing={4} align="start" justify="center">
-        <video
-          ref={localVideoRef}
-          autoPlay
-          muted
-          playsInline
-          style={{ width: '250px', borderRadius: '8px', background: '#000' }}
-        />
-        <video
-          ref={remoteVideoRef}
-          autoPlay
-          playsInline
-          style={{ width: '250px', borderRadius: '8px', background: '#000' }}
-        />
-      </HStack>
-
-      <Center>
-        <Button
-          mt={3}
-          size="sm"
-          colorScheme="red"
-          onClick={stopVideoChat}
-          isDisabled={!isVideoStarted || loading}
-        >
-          🛑 Stop Video
-        </Button>
-      </Center>
-    </Box>
-  );
+      <Center>
+        {!isStarted ? (
+          <Button mt={4} onClick={startLocalStream} colorScheme="green">
+            ▶️ Start Video
+          </Button>
+        ) : (
+          <Button mt={4} onClick={stopVideoChat} colorScheme="red">
+            🛑 Stop Video
+          </Button>
+        )}
+      </Center>
+    </Box>
+  );
 };
 
 export default VideoChat;
