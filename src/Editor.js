@@ -463,17 +463,23 @@ const startVoiceChat = async () => {
 
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
-  socket.current.emit("voice-offer", { roomId, offer });
+  socket.current.emit("voice-offer", { offer });
 
-  socket.current.on("voice-answer", async ({ answer }) => {
+  // socket.current.on("voice-answer", async ({ answer }) => {
+  //   await pc.setRemoteDescription(new RTCSessionDescription(answer));
+  // });
+socket.current.on("voice-answer", async ({ answer }) => {
+  if (answer && answer.type && answer.sdp) {
     await pc.setRemoteDescription(new RTCSessionDescription(answer));
-  });
-
+  } else {
+    console.error('Invalid answer:', answer);
+  }
+});
   socket.current.on("voice-offer", async ({ offer }) => {
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
-    socket.current.emit("voice-answer", { roomId, answer });
+    socket.current.emit("voice-answer", {  answer });
   });
 
   pc.onicecandidate = (e) => {
