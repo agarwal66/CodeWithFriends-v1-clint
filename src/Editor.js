@@ -292,7 +292,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
-import VideoChat from './videoChat';
 import throttle from 'lodash.throttle';
 import {
   Box, Flex, VStack, HStack, Text, Button, Select, Textarea, Input, Avatar,
@@ -302,6 +301,7 @@ import {
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 
 const MemoizedCodeMirror = memo(CodeMirror);
+
 const MemoizedChat = memo(({ chat, user }) => {
   const chatRef = useRef(null);
   useEffect(() => {
@@ -320,11 +320,11 @@ const MemoizedChat = memo(({ chat, user }) => {
 });
 
 export default function Editor() {
-const { roomId } = useParams();
-const navigate = useNavigate();
-const user = JSON.parse(localStorage.getItem("user"));
-const socket = useRef(null);
-const toast = useToast();
+  const { roomId } = useParams();
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
+  const socket = useRef(null);
+  const toast = useToast();
 const localStreamRef = useRef(null);
 const remoteAudioRef = useRef(null);
 const peerConnectionRef = useRef(null);
@@ -462,36 +462,21 @@ const startVoiceChat = async () => {
     remoteAudioRef.current.srcObject = event.streams[0];
   };
 
-  // Create an offer and set local description
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
   socket.current.emit("voice-offer", { roomId, offer });
 
-  // Handling received voice answer
   socket.current.on("voice-answer", async ({ answer }) => {
-    // Ensure the remote description is set only when the state is "stable"
-    if (pc.signalingState === "stable") {
-      console.log("Setting remote description");
-      await pc.setRemoteDescription(new RTCSessionDescription(answer));
-    } else {
-      console.error("Failed to set remote description due to wrong state");
-    }
+    await pc.setRemoteDescription(new RTCSessionDescription(answer));
   });
 
-  // Handling received voice offer (for incoming peer connection)
   socket.current.on("voice-offer", async ({ offer }) => {
-    if (pc.signalingState === "stable") {
-      console.log("Setting remote description for incoming offer");
-      await pc.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      socket.current.emit("voice-answer", { roomId, answer });
-    } else {
-      console.error("Failed to set remote description due to wrong state");
-    }
+    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    socket.current.emit("voice-answer", { roomId, answer });
   });
 
-  // ICE Candidate handling
   pc.onicecandidate = (e) => {
     if (e.candidate) {
       socket.current.emit("ice-candidate", { roomId, candidate: e.candidate });
@@ -542,7 +527,6 @@ const detectSpeaking = (stream) => {
 
   return (
   <Flex direction="column" minH="100vh" bg={useColorModeValue("gray.50", "gray.900")}>
-    
     <Flex px={6} py={3} bg="blue.600" align="center">
       <Text fontWeight="bold" fontSize="xl" color="white">Room ID: {roomId}</Text>
       <Spacer />
