@@ -467,7 +467,7 @@ const startVoiceChat = async () => {
   socket.current.emit("voice-offer", { roomId, offer });
 
   socket.current.on("voice-answer", async ({ answer }) => {
-    await pc.setRemoteDescription(new RTCSessionDescription(roomId,answer));
+    await pc.setRemoteDescription(new RTCSessionDescription(answer));
   });
 
   socket.current.on("voice-offer", async ({ offer }) => {
@@ -527,10 +527,7 @@ const detectSpeaking = (stream) => {
 
   return (
   <Flex direction="column" minH="100vh" bg={useColorModeValue("gray.50", "gray.900")}>
-    <Box>
-  <VideoChat roomId={roomId} user={user} socket={socket.current} />
-</Box>
-
+    
     <Flex px={6} py={3} bg="blue.600" align="center">
       <Text fontWeight="bold" fontSize="xl" color="white">Room ID: {roomId}</Text>
       <Spacer />
