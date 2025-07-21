@@ -23,7 +23,7 @@ export default function RoomHistory() {
         console.error("Fetch error:", err);
         setRooms([]);
       });
-  }, []);
+  }, [BACKEND_URL]);
 
   const handleRejoin = (roomId) => {
     navigate(`/editor/${roomId}`);

@@ -177,14 +177,14 @@ export default function Dashboard() {
         }
       })
       .catch(() => navigate("/"));
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!user) navigate("/");
     }, 7000);
     return () => clearTimeout(timeout);
-  }, [user]);
+  }, [user,navigate]);
 
   // Fetch grouped rooms from room_history
   useEffect(() => {
@@ -282,7 +282,7 @@ export default function Dashboard() {
 
         {/* Collaboration/Action Section */}
         <Paper elevation={1} sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h6" gutterBottom>// COLLABORATION TERMINAL</Typography>
+          <Typography variant="h6" gutterBottom>COLLABORATION TERMINAL</Typography>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center">
             <Button
               startIcon={<AddIcon />}
@@ -319,7 +319,7 @@ export default function Dashboard() {
 
         {/* Active Sessions */}
         <Paper variant="outlined" sx={{ p: 3, mb: 2 }}>
-          <Typography variant="h6">// ACTIVE SESSIONS</Typography>
+          <Typography variant="h6"> ACTIVE SESSIONS</Typography>
           <Divider sx={{ my: 2 }} />
           {rooms.length === 0 ? (
             <Typography py={5} textAlign="center" color="text.secondary">
