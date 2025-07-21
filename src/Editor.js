@@ -205,7 +205,24 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
       setIsMuted(!isMuted);
     }
   };
+  const handleSendMessage = async () => {
+  try {
+    const res = await fetch("/send-message", {
+      method: "POST",
+      body: JSON.stringify({ message }),
+      headers: { "Content-Type": "application/json" },
+    });
 
+    if (!res.ok) {
+      const data = await res.json();
+      if (res.status === 429) {
+        alert(data.message); // Show error message if rate limit exceeded
+      }
+    }
+  } catch (error) {
+    console.error("Error sending message", error);
+  }
+};
   const handleStop = () => {
     localStreamRef.current?.getTracks().forEach(track => track.stop());
     peerConnectionRef.current?.close();
