@@ -462,21 +462,35 @@ const startVoiceChat = async () => {
     remoteAudioRef.current.srcObject = event.streams[0];
   };
 
+  // Create offer and set local description
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
+
   socket.current.emit("voice-offer", { roomId, offer });
 
   socket.current.on("voice-answer", async ({ answer }) => {
-    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+    // Ensure that we are in the correct state before setting remote description
+    if (pc.signalingState === "stable") {
+      console.log("Signaling state is stable, setting remote description.");
+      await pc.setRemoteDescription(new RTCSessionDescription(answer));
+    } else {
+      console.log("Error: Cannot set remote description. Signaling state is not stable.");
+    }
   });
 
   socket.current.on("voice-offer", async ({ offer }) => {
-    await pc.setRemoteDescription(new RTCSessionDescription(offer));
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    socket.current.emit("voice-answer", { roomId, answer });
+    // Set the remote description if the state is stable
+    if (pc.signalingState === "stable") {
+      await pc.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      socket.current.emit("voice-answer", { roomId, answer });
+    } else {
+      console.error("Failed to set remote description, signaling state:", pc.signalingState);
+    }
   });
 
+  // ICE Candidate handling
   pc.onicecandidate = (e) => {
     if (e.candidate) {
       socket.current.emit("ice-candidate", { roomId, candidate: e.candidate });
