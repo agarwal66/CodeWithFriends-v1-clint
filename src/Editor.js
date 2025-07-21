@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import throttle from 'lodash.throttle';
-import VideoChat from './VideoChat'; // Import the VideoChat component
+import VideoChat from './videoChat.jsx'; // Import the VideoChat component
 import {
   Box, Flex, VStack, HStack, Text, Button, Select, Textarea, Input, Avatar,
   useColorMode, Tabs, TabList, TabPanels, Tab, TabPanel, IconButton, Spacer, Tag,
