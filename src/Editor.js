@@ -485,7 +485,7 @@ const startVoiceChat = async () => {
 
   socket.current.on("ice-candidate", async ({ candidate }) => {
     if (candidate) {
-      await pc.addIceCandidate(new RTCIceCandidate(roomId,candidate));
+      await pc.addIceCandidate(new RTCIceCandidate(candidate));
     }
   });
 
