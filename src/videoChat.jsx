@@ -114,24 +114,40 @@ const VideoChat = ({ socket, roomId, user }) => {
   };
 
   useEffect(() => {
-    if (!socket) return;
+  if (!socket) return;
 
-    socket.emit('join-room', { roomId, username: user?.displayName });
+  // Step 1: Join Room
+  socket.emit('join-room', { roomId, username: user?.displayName });
 
-    socket.on('user-joined', handleUserJoin);
-    socket.on('video-offer', handleVideoOffer);
-    socket.on('video-answer', handleVideoAnswer);
-    socket.on('ice-candidate', handleIceCandidate);
-    socket.on('user-left', handleUserLeave);
+  // Step 2: Get all users already connected in this room
+  socket.on('all-users', async ({ users }) => {
+    for (const userSocketId of users) {
+      const pc = createPeerConnection(userSocketId);
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      socket.emit('video-offer', {
+        target: userSocketId,
+        offer: pc.localDescription,
+      });
+    }
+  });
 
-    return () => {
-      socket.off('user-joined', handleUserJoin);
-      socket.off('video-offer', handleVideoOffer);
-      socket.off('video-answer', handleVideoAnswer);
-      socket.off('ice-candidate', handleIceCandidate);
-      socket.off('user-left', handleUserLeave);
-    };
-  }, [socket, roomId]);
+  // Step 3: Listen for all signaling events
+  socket.on('user-joined', handleUserJoin);
+  socket.on('video-offer', handleVideoOffer);
+  socket.on('video-answer', handleVideoAnswer);
+  socket.on('ice-candidate', handleIceCandidate);
+  socket.on('user-left', handleUserLeave);
+
+  return () => {
+    socket.off('all-users');
+    socket.off('user-joined', handleUserJoin);
+    socket.off('video-offer', handleVideoOffer);
+    socket.off('video-answer', handleVideoAnswer);
+    socket.off('ice-candidate', handleIceCandidate);
+    socket.off('user-left', handleUserLeave);
+  };
+}, [socket, roomId]);
 
   return (
     <Box p={4} bg="gray.700" borderRadius="md" minH="300px" mb={4}>

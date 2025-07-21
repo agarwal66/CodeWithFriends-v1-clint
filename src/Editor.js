@@ -292,6 +292,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
+import VideoChat from './videoChat';
 import throttle from 'lodash.throttle';
 import {
   Box, Flex, VStack, HStack, Text, Button, Select, Textarea, Input, Avatar,
@@ -301,7 +302,6 @@ import {
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 
 const MemoizedCodeMirror = memo(CodeMirror);
-
 const MemoizedChat = memo(({ chat, user }) => {
   const chatRef = useRef(null);
   useEffect(() => {
@@ -320,11 +320,11 @@ const MemoizedChat = memo(({ chat, user }) => {
 });
 
 export default function Editor() {
-  const { roomId } = useParams();
-  const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
-  const socket = useRef(null);
-  const toast = useToast();
+const { roomId } = useParams();
+const navigate = useNavigate();
+const user = JSON.parse(localStorage.getItem("user"));
+const socket = useRef(null);
+const toast = useToast();
 const localStreamRef = useRef(null);
 const remoteAudioRef = useRef(null);
 const peerConnectionRef = useRef(null);
@@ -527,6 +527,10 @@ const detectSpeaking = (stream) => {
 
   return (
   <Flex direction="column" minH="100vh" bg={useColorModeValue("gray.50", "gray.900")}>
+    <Box>
+  <VideoChat roomId={roomId} user={user} socket={socket.current} />
+</Box>
+
     <Flex px={6} py={3} bg="blue.600" align="center">
       <Text fontWeight="bold" fontSize="xl" color="white">Room ID: {roomId}</Text>
       <Spacer />
