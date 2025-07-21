@@ -427,6 +427,7 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
       username: user?.displayName || "Anonymous",
       email: user?.emails?.[0]?.value,
     });
+
     socket.current.on("code-output", handleOutputChange);
     socket.current.on('room-users', (users = []) => setActiveUsers(users));
     socket.current.on("code-update", setCode);
@@ -463,23 +464,17 @@ const startVoiceChat = async () => {
 
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
-  socket.current.emit("voice-offer", { offer });
+  socket.current.emit("voice-offer", { roomId, offer });
 
-  // socket.current.on("voice-answer", async ({ answer }) => {
-  //   await pc.setRemoteDescription(new RTCSessionDescription(answer));
-  // });
-socket.current.on("voice-answer", async ({ answer }) => {
-  if (answer && answer.type && answer.sdp) {
+  socket.current.on("voice-answer", async ({ answer }) => {
     await pc.setRemoteDescription(new RTCSessionDescription(answer));
-  } else {
-    console.error('Invalid answer:', answer);
-  }
-});
+  });
+
   socket.current.on("voice-offer", async ({ offer }) => {
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
-    socket.current.emit("voice-answer", {  answer });
+    socket.current.emit("voice-answer", { roomId, answer });
   });
 
   pc.onicecandidate = (e) => {
@@ -655,19 +650,17 @@ const detectSpeaking = (stream) => {
                   Fix It
                 </Button>
                 {aiResponse !== '' && (
-                <Box mt={4} bg="gray.900" color="teal.100" p={3} borderRadius="md" fontFamily="mono" whiteSpace="pre-wrap" position="relative">
-  <IconButton
-    icon={<span>📋</span>}
-    aria-label="Copy"
-    size="sm"
-    position="absolute"
-    top="8px"
-    right="8px"
-    onClick={() => navigator.clipboard.writeText(aiResponse)}
-  />
-  {aiResponse}
-</Box>
-
+                  <Box
+                    mt={4}
+                    bg="gray.900"
+                    color="teal.100"
+                    p={3}
+                    borderRadius="md"
+                    fontFamily="mono"
+                    whiteSpace="pre-wrap"
+                  >
+                    {aiResponse}
+                  </Box>
                 )}
               </Box>
             </TabPanel>
