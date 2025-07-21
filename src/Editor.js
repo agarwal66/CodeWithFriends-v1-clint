@@ -462,31 +462,32 @@ const startVoiceChat = async () => {
     remoteAudioRef.current.srcObject = event.streams[0];
   };
 
-  // Create offer and set local description
+  // Create an offer and set local description
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
-
   socket.current.emit("voice-offer", { roomId, offer });
 
+  // Handling received voice answer
   socket.current.on("voice-answer", async ({ answer }) => {
-    // Ensure that we are in the correct state before setting remote description
+    // Ensure the remote description is set only when the state is "stable"
     if (pc.signalingState === "stable") {
-      console.log("Signaling state is stable, setting remote description.");
+      console.log("Setting remote description");
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
     } else {
-      console.log("Error: Cannot set remote description. Signaling state is not stable.");
+      console.error("Failed to set remote description due to wrong state");
     }
   });
 
+  // Handling received voice offer (for incoming peer connection)
   socket.current.on("voice-offer", async ({ offer }) => {
-    // Set the remote description if the state is stable
     if (pc.signalingState === "stable") {
+      console.log("Setting remote description for incoming offer");
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
       socket.current.emit("voice-answer", { roomId, answer });
     } else {
-      console.error("Failed to set remote description, signaling state:", pc.signalingState);
+      console.error("Failed to set remote description due to wrong state");
     }
   });
 
