@@ -467,7 +467,7 @@ const startVoiceChat = async () => {
   socket.current.emit("voice-offer", { roomId, offer });
 
   socket.current.on("voice-answer", async ({ answer }) => {
-    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+    await pc.setRemoteDescription(new RTCSessionDescription(roomId,answer));
   });
 
   socket.current.on("voice-offer", async ({ offer }) => {
@@ -485,7 +485,7 @@ const startVoiceChat = async () => {
 
   socket.current.on("ice-candidate", async ({ candidate }) => {
     if (candidate) {
-      await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      await pc.addIceCandidate(new RTCIceCandidate(roomId,candidate));
     }
   });
 
