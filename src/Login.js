@@ -116,18 +116,20 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await axios.post(
+      const loginRes = await axios.post(
         `${BACKEND_URL}/auth/login`,
         { email, password },
         { withCredentials: true }
       );
+      console.log("Login response:", loginRes.data);
       window.location.href = "/dashboard";
     } catch (err) {
-      alert("Login failed: " + err.response?.data?.error);
+      alert("Login failed: " + (err.response?.data?.error || err.message));
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const handleRegister = async (e) => {
     e.preventDefault();
