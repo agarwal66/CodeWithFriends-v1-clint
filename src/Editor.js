@@ -359,9 +359,18 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
     [roomId]
   );
 
+  // const handleChange = (value) => {
+  //   setCode(value);
+  //   socket.current.emit('send-code', { roomId, code: value });
+  //   emitTyping(user?.displayName || "Someone");
+  // };
   const handleChange = (value) => {
     setCode(value);
-    socket.current.emit('send-code', { roomId, code: value });
+    socket.current.emit('send-code', {
+      roomId,
+      code: value,
+      sender: socket.current.id, // Use the socket id!
+    });
     emitTyping(user?.displayName || "Someone");
   };
   const handleOutputChange = useCallback(throttle((output) => {
@@ -421,7 +430,9 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
 
   useEffect(() => {
     socket.current = io(BACKEND_URL, { transports: ['websocket'], withCredentials: true });
-
+    socket.current.on('connect', () => {
+      console.log("Socket connected with id:", socket.current.id);
+    });
     socket.current.emit('join-room', {
       roomId,
       username: user?.displayName || "Anonymous",
@@ -430,7 +441,11 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
 
     socket.current.on("code-output", handleOutputChange);
     socket.current.on('room-users', (users = []) => setActiveUsers(users));
-    socket.current.on("code-update", setCode);
+    // socket.current.on("code-update", setCode);
+    socket.current.on("code-update", ({ code: newCode, sender }) => {
+      if (sender === socket.current.id) return; // Ignore own update
+      setCode(prevCode => (prevCode !== newCode ? newCode : prevCode));
+    });
     socket.current.on("receive-message", ({ sender, message }) => setChat(prev => [...prev, { sender, message }]));
     socket.current.on('user-typing', (username) => {
       setTypingUser(username);

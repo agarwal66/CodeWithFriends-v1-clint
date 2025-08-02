@@ -230,7 +230,7 @@
   border-radius: 16px;
   padding: 32px 28px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-  color: #fff;
+  color: #0b0606;
   text-align: left;
 }
 
@@ -250,13 +250,13 @@
 .contact-form input, .contact-form textarea {
   padding: 10px 12px;
   border-radius: 6px;
-  border: 1px solid #ccd6f6;
+  border: 1px solid #323337;
   font-size: 1rem;
   resize: none;
 }
 
 .contact-form button {
-  background: linear-gradient(90deg, #6e7ff3 10%, #00d9ff 90%);
+  background: linear-gradient(90deg, #131316 10%, #1c1f20 90%);
   color: #232946;
   border: none;
   border-radius: 6px;
@@ -267,16 +267,16 @@
   transition: background 0.2s;
 }
 .contact-form button:hover {
-  background: linear-gradient(90deg, #00d9ff 10%, #6e7ff3 90%);
-  color: #fff;
+  background: linear-gradient(90deg, #1c1e1e 10%, #18181b 90%);
+  color: #242121;
 }
 
 .contact-info {
   margin-top: 8px;
-  color: #e0e3ff;
+  color: #242427;
 }
 .contact-info a {
-  color: #00d9ff;
+  color: #1a1c1d;
   text-decoration: none;
   margin: 0 6px;
 }
@@ -288,7 +288,7 @@
 .hero-footer {
   margin-top: 58px;
   font-size: 1rem;
-  color: #d1d5db;
+  color: #15181c;
   text-align: center;
   letter-spacing: 1px;
   z-index: 2;
