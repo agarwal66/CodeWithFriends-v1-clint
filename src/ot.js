@@ -544,7 +544,7 @@ if (typeof ot === 'undefined') {
 
 ot.Selection = (function (global) {
     'use strict';
-
+    var TextOperation = ot.TextOperation; 
     // var TextOperation = global.ot ? global.ot.TextOperation : require('./text-operation');
 
     // Range has `anchor` and `head` properties, which are zero-based indices into
