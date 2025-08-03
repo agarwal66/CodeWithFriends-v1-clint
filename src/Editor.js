@@ -293,6 +293,7 @@ import { io } from 'socket.io-client';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import throttle from 'lodash.throttle';
+import { TextOperation } from './ot';
 import {
   Box, Flex, VStack, HStack, Text, Button, Select, Textarea, Input, Avatar,
   useColorMode, Tabs, TabList, TabPanels, Tab, TabPanel, IconButton, Spacer, Tag,
@@ -351,7 +352,7 @@ const inputPlaceholder = useColorModeValue("gray.500", "gray.400");
 const boxBg = useColorModeValue("white", "gray.800");
 const panelBg = useColorModeValue("gray.100", "gray.900");
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
+  const cmRef = useRef(null);
   const emitTyping = useCallback(
     (username) => {
       socket.current.emit('user-typing', { roomId, username });
@@ -359,20 +360,28 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
     [roomId]
   );
 
+  // When user types:
+  const handleChange = (value, cmChange, cmInstance) => {
+    // Assuming cmChange is the changes array and cmInstance is the CodeMirror doc
+    const op = TextOperation.fromCodeMirrorChanges(cmChange, cmInstance);
+    socket.current.emit('send-op', { roomId, op: op.toJSON(), sender: socket.current.id });
+  };
+
+
   // const handleChange = (value) => {
   //   setCode(value);
   //   socket.current.emit('send-code', { roomId, code: value });
   //   emitTyping(user?.displayName || "Someone");
   // };
-  const handleChange = (value) => {
-    setCode(value);
-    socket.current.emit('send-code', {
-      roomId,
-      code: value,
-      sender: socket.current.id, // Use the socket id!
-    });
-    emitTyping(user?.displayName || "Someone");
-  };
+  // const handleChange = (value) => {
+  //   setCode(value);
+  //   socket.current.emit('send-code', {
+  //     roomId,
+  //     code: value,
+  //     sender: socket.current.id, // Use the socket id!
+  //   });
+  //   emitTyping(user?.displayName || "Someone");
+  // };
   const handleOutputChange = useCallback(throttle((output) => {
     setOutput(output);
   }, 500), []);
@@ -432,6 +441,14 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
     socket.current = io(BACKEND_URL, { transports: ['websocket'], withCredentials: true });
     socket.current.on('connect', () => {
       console.log("Socket connected with id:", socket.current.id);
+    });
+    socket.current.on('op-update', ({ op, sender }) => {
+      if (sender === socket.current.id) return;
+      const operation = TextOperation.fromJSON(op);
+      // Apply operation to CodeMirror (not setCode)
+      if (cmRef.current && cmRef.current.applyOperation) {
+        cmRef.current.applyOperation(operation);
+      }
     });
     socket.current.emit('join-room', {
       roomId,
@@ -620,6 +637,7 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
             extensions={[javascript()]}
             onChange={handleChange}
             theme={colorMode === 'dark' ? 'dark' : 'light'}
+            editorDidMount={(editorView) => { cmRef.current = editorView; }}
           />
         </Box>
 
