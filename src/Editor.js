@@ -353,6 +353,8 @@ const boxBg = useColorModeValue("white", "gray.800");
 const panelBg = useColorModeValue("gray.100", "gray.900");
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
   const cmRef = useRef(null);
+  const [editorMode, setEditorMode] = useState('ot'); // 'ot', 'classic1', 'classic2'
+
   const emitTyping = useCallback(
     (username) => {
       socket.current.emit('user-typing', { roomId, username });
@@ -361,27 +363,26 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
   );
 
   // When user types:
-  const handleChange = (value, cmChange, cmInstance) => {
-    // Assuming cmChange is the changes array and cmInstance is the CodeMirror doc
+  const handleChangeOT = (value, cmChange, cmInstance) => {
     const op = TextOperation.fromCodeMirrorChanges(cmChange, cmInstance);
     socket.current.emit('send-op', { roomId, op: op.toJSON(), sender: socket.current.id });
+    emitTyping(user?.displayName || "Someone"); // Always show typing indicator
   };
-
 
   // const handleChange = (value) => {
   //   setCode(value);
   //   socket.current.emit('send-code', { roomId, code: value });
   //   emitTyping(user?.displayName || "Someone");
   // };
-  // const handleChange = (value) => {
-  //   setCode(value);
-  //   socket.current.emit('send-code', {
-  //     roomId,
-  //     code: value,
-  //     sender: socket.current.id, // Use the socket id!
-  //   });
-  //   emitTyping(user?.displayName || "Someone");
-  // };
+  const handleChange = (value) => {
+    setCode(value);
+    socket.current.emit('send-code', {
+      roomId,
+      code: value,
+      sender: socket.current.id, // Use the socket id!
+    });
+    emitTyping(user?.displayName || "Someone");
+  };
   const handleOutputChange = useCallback(throttle((output) => {
     setOutput(output);
   }, 500), []);
@@ -631,11 +632,28 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
       <Flex direction="column" w={{ base: "100%", md: "75%" }} gap={4}>
         {/* Code Editor */}
         <Box rounded="lg" bg="gray.800" p={3} shadow="md">
+        <HStack mb={2}>
+    <Button
+      size="sm"
+      colorScheme={editorMode === 'ot' ? 'blue' : 'gray'}
+      onClick={() => setEditorMode('ot')}
+    >
+      OT Mode
+    </Button>
+    <Button
+      size="sm"
+      colorScheme={editorMode === 'classic' ? 'blue' : 'gray'}
+      onClick={() => setEditorMode('classic')}
+    >
+      Classic Mode
+    </Button>
+  </HStack>
           <MemoizedCodeMirror
             value={code}
             height="300px"
             extensions={[javascript()]}
-            onChange={handleChange}
+            // onChange={handleChange}
+            onChange={editorMode === 'ot' ? handleChangeOT : handleChange}
             theme={colorMode === 'dark' ? 'dark' : 'light'}
             editorDidMount={(editorView) => { cmRef.current = editorView; }}
           />
