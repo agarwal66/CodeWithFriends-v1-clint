@@ -294,6 +294,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import throttle from 'lodash.throttle';
 import { TextOperation } from './ot';
+import { Tooltip } from "@chakra-ui/react";
 import {
   Box, Flex, VStack, HStack, Text, Button, Select, Textarea, Input, Avatar,
   useColorMode, Tabs, TabList, TabPanels, Tab, TabPanel, IconButton, Spacer, Tag,
@@ -633,6 +634,22 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
         {/* Code Editor */}
         <Box rounded="lg" bg="gray.800" p={3} shadow="md">
         <HStack mb={2}>
+  <Tooltip
+    label={
+      <div>
+        <b>OT Mode:</b> <br />
+        Real-time, safe collaboration.<br />
+        Multiple users can edit together, no data loss, smooth merging.
+      </div>
+    }
+    placement="right"
+    hasArrow
+    bg="gray.700"
+    color="white"
+    p={3}
+    borderRadius="md"
+    fontSize="sm"
+  >
     <Button
       size="sm"
       colorScheme={editorMode === 'ot' ? 'blue' : 'gray'}
@@ -640,6 +657,23 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
     >
       OT Mode
     </Button>
+  </Tooltip>
+  <Tooltip
+    label={
+      <div>
+        <b>Classic Mode:</b> <br />
+        Simple real-time updates.<br />
+        Not safe for teamwork—changes can be lost if many people type together.
+      </div>
+    }
+    placement="right"
+    hasArrow
+    bg="gray.700"
+    color="white"
+    p={3}
+    borderRadius="md"
+    fontSize="sm"
+  >
     <Button
       size="sm"
       colorScheme={editorMode === 'classic' ? 'blue' : 'gray'}
@@ -647,7 +681,8 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
     >
       Classic Mode
     </Button>
-  </HStack>
+  </Tooltip>
+</HStack>
           <MemoizedCodeMirror
             value={code}
             height="300px"
