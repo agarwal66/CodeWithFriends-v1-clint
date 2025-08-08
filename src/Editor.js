@@ -295,11 +295,14 @@ import { javascript } from '@codemirror/lang-javascript';
 import throttle from 'lodash.throttle';
 import { TextOperation } from './ot';
 import { Tooltip } from "@chakra-ui/react";
+import { FaCode, FaPlay } from 'react-icons/fa';
+// import { Spinner, VStack } from '@chakra-ui/react';
 import {
   Box, Flex, VStack, HStack, Text, Button, Select, Textarea, Input, Avatar,
   useColorMode, Tabs, TabList, TabPanels, Tab, TabPanel, IconButton, Spacer, Tag,
-  useColorModeValue, useToast, Menu, MenuButton, MenuList, MenuItem
-} from "@chakra-ui/react";
+  useColorModeValue, useToast, Menu, MenuButton, MenuList, MenuItem, Spinner
+} from '@chakra-ui/react';
+
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 
 const MemoizedCodeMirror = memo(CodeMirror);
@@ -357,7 +360,8 @@ const [isSpeaking, setIsSpeaking] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [hasExecuted, setHasExecuted] = useState(false);
   const { colorMode, toggleColorMode } = useColorMode();
   const inputBg = useColorModeValue("white", "gray.700");
   const inputColor = useColorModeValue("black", "white");
@@ -402,8 +406,12 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
   const handleOutputChange = useCallback(throttle((output) => {
     setOutput(output);
   }, 500), []);
-   const runCode = async () => {
+// In the runCode function:
+const runCode = async () => {
   try {
+    setIsExecuting(true);
+    setOutput('Executing code...');
+    
     const res = await fetch(`${BACKEND_URL}/run-code`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -416,22 +424,17 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
     });
 
     const result = await res.json();
-
-    if (result.stdout) {
-      setOutput(result.stdout);
-    } else if (result.stderr) {
-      setOutput("❌ Runtime Error:\n" + result.stderr);
-    } else if (result.compile_output) {
-      setOutput("🛠 Compile Error:\n" + result.compile_output);
-    } else {
-      setOutput("⚠ No output or error received.");
+    
+    if (!res.ok) {
+      throw new Error(result.error || 'Failed to execute code');
     }
+
   } catch (err) {
     console.error("RunCode Error:", err);
-    setOutput("❗ Failed to run code. Please check your connection or server logs.");
+    setOutput(`Error: ${err.message}`);
+    setIsExecuting(false);
   }
 };
-
   const handleAskAI = async () => {
     setLoading(true);
     try {
@@ -480,7 +483,25 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
     socket.current.on('init-code', (latestCode) => {
       setCode(latestCode);
     });
-    socket.current.on("code-output", handleOutputChange);
+    // socket.current.on("code-output", handleOutputChange);
+   // In Editor.js, update the code-output handler:
+   socket.current.on("code-output", (output) => {
+    if (output && output.trim()) {
+      // Clean up the output
+      let cleanOutput = output.trim();
+      // Remove any JSON formatting if present
+      try {
+        const parsed = JSON.parse(cleanOutput);
+        cleanOutput = parsed.error || parsed.message || JSON.stringify(parsed, null, 2);
+      } catch (e) {
+        // Not JSON, use as is
+      }
+      setOutput(cleanOutput);
+    } else {
+      setOutput("// Program executed successfully with no output");
+    }
+    setIsExecuting(false);
+  });
     socket.current.on('room-users', (users = []) => setActiveUsers(users));
     // socket.current.on("code-update", setCode);
     socket.current.on("code-update", ({ code: newCode, sender }) => {
@@ -770,8 +791,49 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
                 color={inputColor}
                 mb={3}
               />
-              <Box bg="gray.700" color="white" p={3} rounded="md" fontFamily="mono">{output}</Box>
-              <Button mt={3} colorScheme="blue" onClick={runCode}>Run Code</Button>
+         <Box 
+  bg="gray.900" 
+  color="white" 
+  p={3} 
+  rounded="md" 
+  fontFamily="mono"
+  minHeight="100px"
+  maxHeight="400px"
+  overflowY="auto"
+  whiteSpace="pre-wrap"
+  border="1px"
+  borderColor="gray.700"
+>
+{isExecuting ? (
+    <VStack h="100%" justify="center" spacing={2}>
+      <Spinner color="blue.400" size="md" />
+      <Text color="blue.300" textAlign="center">Executing your code...</Text>
+    </VStack>
+  ) : output === "" ? (
+    <VStack h="100%" justify="center" spacing={2}>
+      <FaCode size={24} color="#4A5568" />
+      <Text color="gray.400" textAlign="center">
+        Run your code to see the output here
+      </Text>
+    </VStack>
+  ) : output.toLowerCase().includes('error') ? (
+    <Text color="red.400" whiteSpace="pre-wrap">{output}</Text>
+  ) : (
+    <Text whiteSpace="pre-wrap">{output}</Text>
+  )}
+</Box>
+<Button 
+  mt={3} 
+  colorScheme="blue" 
+  onClick={runCode}
+  isLoading={isExecuting}
+  loadingText="Executing"
+  leftIcon={<FaPlay />}
+  width="100%"
+  size="md"
+>
+  Run Code
+</Button>
             </TabPanel>
 
             {/* Ask AI Tab */}
