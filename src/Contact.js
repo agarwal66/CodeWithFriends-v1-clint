@@ -12,21 +12,28 @@ const Contact = () => {
     const email = e.target.email.value;
     const message = e.target.message.value;
 
+    // Use environment variable for API URL or default to current domain
+    const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch(`${API_URL}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, message }),
+        credentials: 'include' // Important for cookies/session
       });
 
+      const data = await res.json();
+      
       if (res.ok) {
-        alert("Thank you for contacting us!");
+        alert(data.message || "Thank you for contacting us!");
         e.target.reset();
       } else {
-        alert("Failed to send. Please try again later.");
+        alert(data.message || "Failed to send. Please try again later.");
       }
     } catch (err) {
-      alert("An error occurred. Please try again.");
+      console.error('Error:', err);
+      alert("An error occurred. Please check the console for details.");
     }
     setLoading(false);
   };
