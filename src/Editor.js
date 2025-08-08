@@ -333,13 +333,25 @@ const peerConnectionRef = useRef(null);
 const [isVoiceStarted, setIsVoiceStarted] = useState(false);
 const [isMuted, setIsMuted] = useState(false);
 const [isSpeaking, setIsSpeaking] = useState(false);
-
-  const [code, setCode] = useState("// Start coding together!\n");
   const [typingUser, setTypingUser] = useState(null);
   const [chat, setChat] = useState([]);
   const [message, setMessage] = useState('');
   const [activeUsers, setActiveUsers] = useState([]);
-  const [languageId, setLanguageId] = useState(54);
+  const [languageId, setLanguageId] = useState(() => {
+    const saved = localStorage.getItem("editor_languageId");
+    return saved !== null ? Number(saved) : 54;
+  });
+  const [code, setCode] = useState(() => {
+    const saved = localStorage.getItem(`editor_code_${languageId}`);
+    return saved ?? "// Start coding together!\n";
+  });
+  useEffect(() => {
+    localStorage.setItem(`editor_code_${languageId}`, code);
+  }, [code, languageId]);
+  
+  useEffect(() => {
+    localStorage.setItem("editor_languageId", languageId);
+  }, [languageId]);
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [prompt, setPrompt] = useState('');
@@ -365,9 +377,12 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
 
   // When user types:
   const handleChangeOT = (value, cmChange, cmInstance) => {
+    setCode(value);
+    // Save to server!
+    socket.current.emit('code-update', { roomId, code: value });
     const op = TextOperation.fromCodeMirrorChanges(cmChange, cmInstance);
     socket.current.emit('send-op', { roomId, op: op.toJSON(), sender: socket.current.id });
-    emitTyping(user?.displayName || "Someone"); // Always show typing indicator
+    emitTyping(user?.displayName || "Someone");
   };
 
   // const handleChange = (value) => {
@@ -450,6 +465,11 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
       // Apply operation to CodeMirror (not setCode)
       if (cmRef.current && cmRef.current.applyOperation) {
         cmRef.current.applyOperation(operation);
+        // After applying the OT operation, update React state with the latest code:
+        const latestCode = cmRef.current.getValue();
+        console.log("Latest code from CodeMirror:", latestCode);
+        setCode(latestCode);
+        socket.current.emit('code-update', { roomId, code: latestCode });
       }
     });
     socket.current.emit('join-room', {
@@ -457,7 +477,9 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
       username: user?.displayName || "Anonymous",
       email: user?.emails?.[0]?.value,
     });
-
+    socket.current.on('init-code', (latestCode) => {
+      setCode(latestCode);
+    });
     socket.current.on("code-output", handleOutputChange);
     socket.current.on('room-users', (users = []) => setActiveUsers(users));
     // socket.current.on("code-update", setCode);
@@ -561,19 +583,56 @@ const panelBg = useColorModeValue("gray.100", "gray.900");
     };
     detect();
   };
-
+  const handleLanguageChange = (newLangId) => {
+    // Save current code to its language slot
+    localStorage.setItem(`editor_code_${languageId}`, code);
+  
+    // Get code for the new language, if any
+    let newCode = localStorage.getItem(`editor_code_${newLangId}`);
+  
+    if (code.trim() !== "" && code.trim() !== "// Start coding together!") {
+      const confirmChange = window.confirm(
+        "Changing the language will erase your current code. Do you want to continue?"
+      );
+      if (!confirmChange) return;
+  
+      // Only reset if there is NO code for the new language yet
+      if (!newCode) {
+        newCode = ""; // or your template
+        localStorage.setItem(`editor_code_${newLangId}`, "");
+        if (editorMode === "ot") {
+          socket.current.emit('code-update', { roomId, code: "" });
+        }
+      }
+      // If there IS code for the new language, just load it (don't reset)
+    }
+  
+    setLanguageId(newLangId);
+    setCode(newCode ?? ""); // If newCode is null, set to empty string
+  };
+ 
   return (
   <Flex direction="column" minH="100vh" bg={useColorModeValue("gray.50", "gray.900")}>
     <Flex px={6} py={3} bg="blue.600" align="center">
       <Text fontWeight="bold" fontSize="xl" color="white">Room ID: {roomId}</Text>
       <Spacer />
       <HStack spacing={3}>
-        <Select value={languageId} onChange={e => setLanguageId(Number(e.target.value))} size="sm" w="120px">
-          <option value={54}>C++</option>
-          <option value={62}>Java</option>
-          <option value={71}>Python</option>
-          <option value={63}>JavaScript</option>
-        </Select>
+      <select
+  value={languageId}
+  onChange={(e) => handleLanguageChange(Number(e.target.value))}
+  className="dropdown"
+  style={{
+    width: "110px",       // or try 90px, 100px as needed
+    fontSize: "0.95rem",  // reduce font size
+    padding: "2px 6px",   // reduce padding for a more compact look
+    borderRadius: "6px"   // optional, for a modern look
+  }}
+>
+  <option value={63}>JavaScript</option>
+  <option value={54}>C++</option>
+  <option value={62}>Java</option>
+  <option value={71}>Python</option>
+</select>
         <Tag size="sm" colorScheme="green">Users: {activeUsers.length}</Tag>
         <Button onClick={leaveRoom} size="sm" colorScheme="red">Leave Room</Button>
         <Text color="white">{user?.displayName || 'Anonymous'}</Text>
